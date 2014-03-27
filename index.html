@@ -1,52 +1,120 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>안녕, 한글! 넌 네 코드를 소중히 여기지 않았지. 그럼, 게임을 시작하지</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<meta charset="utf-8"/>
+<style>
+	.selected{
+		font-weight:bold;
+		color:red;
+		border:2px solid red;
+	}
+</style>
+<script src="http://projectbs.github.io/bsJS/bs/bsjs.js"></script>
+</head>
+<body>
+<h1 id='result'>aa</h1>>
+<input onkeyup='if(event.keyCode == 13)bssel(this.value);'id='selector' style='padding:5px;border:2px solid green;font-size:20px;'>
+<button onclick='bssel(document.getElementById("selector").value);'>go</button>
+<article>
+	<div>ar-div1
+		<a>ar-div1-a</a>
+	</div>
+	<div>ar-div2
+		<ul>
+			<li>ar-div2-ul-li
+				<a>ar-div2-ul-li-a</a>
+			</li>
+		</ul>
+	</div>
+</article>
+<section>
+	<div>sec-div1
+		<a>sec-div1-a</a>
+	</div>
+	<div>sec-div2
+		<ul>
+			<li>sec-div2-ul-li
+				<div>sec-div2-ul-li-div
+					<ul>
+						<li disabled data-id='abc-def'>sec-div2-ul-li-div-ul-li</li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<div>sec-div3
+		<ul class='testid'>
+			<li><a href='#testid'>sec-div3-ul-li</a>
+				<div id='testid' data-id='abc'>sec-div3-ul-li-div
+					<ul>
+						<li class='testid testid2' data-id='abc def' href='#'><a href='http://www.naver.com'>sec-div3-ul-li-div-ul-li1</a></li>
+						<li class='testid'><a href='#'>sec-div3-ul-li-div-ul-li2</a></li>
+						<li class='testid'><a href='#'>sec-div3-ul-li-div-ul-li3</a></li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+	<p class='empty'></p>
+</section>
+<form>
+<input type='text' name='aaa' alt='' readonly disabled>
+<input type='text' name='aaa1' alt='' readonly disabled>
+<input type='checkbox' name='bbb' alt='fff' readonly>
+<input type='checkbox' name='bbb1' alt='fff' checked='false'>
+<input type='checkbox' name='bbb2' alt='fff' checked disabled>
+<input type='radio' name='ccc' alt='fff' disabled readonly>
+<br/>
+<select name='sel1'>
+<option>1<option>
+<option>2<option>
+</select>
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Bsselector : " />
+<select name='sel2' disabled>
+<option disabled>1<option>
+<option>2<option>
+</select>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+<textarea name='area1'>
+</textarea>
+<textarea name='area2' disabled>
+</textarea>
 
-    <title>Bsselector</title>
-  </head>
+</form>
+<script src="./js/selector.js"></script>
+<script>
+//bssel('li[disabled], input[type], :checked[type][type]');
+bssel('input[type]');
+//bssel('.testid>[data-id]');
+//bssel('.testid>[data-id], .testid [data-id]');
+//bssel('[data-id] form[data-id]:checked');
+//bssel('li   [data-id="abc   def"]');
+//bssel('.testid.testid2');
+//bssel('#testid:first-child');
+//bssel('article+section');
+//bssel('li[data-id~=\'def\']');
+//bssel("p  ~  div   ~   p  [data-id='abc  def']  :first-child  [data-id='abc  def']  ");
+//bssel('article ~ form');
+//bssel('li[data-id$=\'f\']');
+//bssel('input:nth-of-type(1)');
+//bssel('input:first-of-type');
+//bssel('input:last-of-type');
+//bssel('input:nth-last-of-type(1)');
+//bssel('input:only-of-type');
+//bssel('li:only-child');
+//bssel('li:first-child');
+//bssel('li:last-child');
+//bssel('li:nth-child(odd)');
+//bssel('li:nth-last-child(even)');
+//bssel('input:empty');
+//bssel(':checked');
+//bssel(':enabled');
+//bssel(':root');
+</script>
 
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/projectBS/bsSelector">View on GitHub</a>
-
-          <h1 id="project_title">Bsselector</h1>
-          <h2 id="project_tagline"></h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/projectBS/bsSelector/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/projectBS/bsSelector/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h1>
-<a name="bsselector" class="anchor" href="#bsselector"><span class="octicon octicon-link"></span></a>bsSelector</h1>
-
-<p>bsJS 의 Selector 연구나무</p>
-      </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Bsselector maintained by <a href="https://github.com/projectBS">projectBS</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
-  </body>
+</body>
 </html>
