@@ -324,21 +324,32 @@ var finder = (function(){
 		};
 	})();
 	return function($s){
-		var nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
+		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
 			key, hit, token, tokens;
 		console.log('############', $s);
-		document.getElementById('selector').value = $s;
+		doc = document;
+		doc.getElementById('selector').value = $s;
+		if( !bs.trim($s) ) return;
 		oSel = [],
 		sels = bs.trim( $s.split(',') );
 		for( i = sels.length; i--; ){
 			oSel.push( parseQuery( sels[i] ) );
 		}
-		//console.log(oSel);
-		// TODO:native 처리
+		console.log("### oSel", oSel);
 		ret = [];
-		if( els = document.getElementsByTagName('*') ){
+		// TODO:native 처리
+		if( oSel.length == 1 && oSel[0].length == 1 && ( key = oSel[0][0].charAt(0) ) ){
+			if( key == '#' )
+				ret.push( doc.getElementById( $s ) );
+			else if( key == '.' && doc.getElementsByClassName )
+				ret = doc.getElementsByClassName( $s );
+			else if( (/[a-z]/i).test( $s ) )
+				ret = doc.getElementsByTagName( $s );
+		}
+		if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
+		if( !ret.length && ( els = doc.getElementsByTagName('*') ) ){
 			for( i = 0, j = els.length; i < j; i++ ){
-				els[i].className = els[i].className.replace('selected','');
+				els[i].className = els[i].className.replace( 'selected', '' );
 				hit = 0;
 				for( k = oSel.length; k--; ){
 					tokens = oSel[k];
@@ -377,18 +388,18 @@ var finder = (function(){
 		}
 		//echo(ret[0]);
 		console.log('## bssel:',ret);
-		document.getElementById('result').style.backgroundColor = 'white';
-		document.getElementById('result').innerHTML = ret.length;
-		if(isQS){
-			nRet = document.querySelectorAll($s), console.log( '## native:', nRet );
+		doc.getElementById('result').style.backgroundColor = 'white';
+		doc.getElementById('result').innerHTML = ret.length;
+		if( isQS ){
+			nRet = doc.querySelectorAll($s), console.log( '## native:', nRet );
 			if( ret.length != nRet.length ){
-				document.getElementById('result').innerHTML = 'fail';
+				doc.getElementById('result').innerHTML = 'fail';
 			}else{
-				document.getElementById('result').innerHTML = 'success';
+				doc.getElementById('result').innerHTML = 'success';
 			}
 			for(var i=0; i<ret.length; i++){
 				if( ret[i] != nRet[i] ){
-					document.getElementById('result').style.backgroundColor = 'red';
+					doc.getElementById('result').style.backgroundColor = 'red';
 					ret[i].className = ret[i].className ? ret[i].className + ' selected': 'selected';
 				}
 			}
