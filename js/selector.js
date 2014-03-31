@@ -7,7 +7,7 @@
 var bssel = (function(){
 'use strict';
 var isQS;
-isQS = ( typeof document.querySelector == 'function' ); // <= IE8
+isQS = ( typeof document.querySelectorAll == 'function' ); // <= IE8
 var isIE7;
 var echo = function(target, filter, parentName) {
 	var k;
@@ -323,12 +323,12 @@ var finder = (function(){
 			return 0;
 		};
 	})();
-	return function($s){
+	return function finder($s){
 		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
 			key, hit, token, tokens;
 		console.log('############', $s);
-		doc = document;
-		doc.getElementById('selector').value = $s;
+		doc = document,
+		finder.lastQuery = $s;
 		if( !bs.trim($s) ) return;
 		oSel = [],
 		sels = bs.trim( $s.split(',') );
@@ -349,7 +349,6 @@ var finder = (function(){
 		if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
 		if( !ret.length && ( els = doc.getElementsByTagName('*') ) ){
 			for( i = 0, j = els.length; i < j; i++ ){
-				els[i].className = els[i].className.replace( 'selected', '' );
 				hit = 0;
 				for( k = oSel.length; k--; ){
 					tokens = oSel[k];
@@ -387,31 +386,10 @@ var finder = (function(){
 			}
 		}
 		//echo(ret[0]);
-		console.log('## bssel:',ret);
-		doc.getElementById('result').style.backgroundColor = 'white';
-		doc.getElementById('result').innerHTML = ret.length;
-		if( isQS ){
-			nRet = doc.querySelectorAll($s), console.log( '## native:', nRet );
-			if( ret.length != nRet.length ){
-				doc.getElementById('result').innerHTML = 'fail';
-			}else{
-				doc.getElementById('result').innerHTML = 'success';
-			}
-			for(var i=0; i<ret.length; i++){
-				if( ret[i] != nRet[i] ){
-					doc.getElementById('result').style.backgroundColor = 'red';
-					ret[i].className = ret[i].className ? ret[i].className + ' selected': 'selected';
-				}
-			}
-		}else{
-			for (var i=0; i < ret.length; i++) {
-				console.log( ret[i].outerHTML );
-			};
-			console.log()
-		}
-		console.log('## bssel length:', ret.length);
+		return ret;
 	}
 })();
+	finder.isQS = isQS;
 	return finder;
 })();
 
