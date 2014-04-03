@@ -4,6 +4,23 @@
 	http://css4-selectors.com/browser-selector-test/
 	http://kimblim.dk/css-tests/selectors/
 */
+var bs = {};
+bs.trim = (function(){
+	var t = String.prototype.trim ? 1 : 0, trim = /^\s*|\s*$/g,
+	f = function(v){
+		var t0, i;
+		if( !v ) return v;
+		t0 = typeof v;
+		if( t0 == 'string' ) return t ? v.trim() : v.replace( trim, '' );
+		if( t0 == 'object' ){
+			if( v.splice ){t0 = [], i = v.length; while( i-- ) t0[i] = f(v[i]);}
+			else{t0 = {}; for( i in v ) if( v.hasOwnProperty(i) ) t0[i] = f(v[i]);}
+			return t0;
+		}
+		return v;
+	};
+	return f;
+})();
 var bssel = (function(){
 'use strict';
 var isQS;
@@ -133,7 +150,7 @@ var finder = (function(){
 				}
 			}
 		}
-		console.log(tokens);
+		//console.log(tokens);
 		return tokens;
 	},
 	compareEl = (function(){
@@ -326,7 +343,7 @@ var finder = (function(){
 	return function finder($s){
 		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
 			key, hit, token, tokens;
-		console.log('############', $s);
+		//console.log('############', $s);
 		doc = document,
 		finder.lastQuery = $s;
 		if( !bs.trim($s) ) return;
@@ -335,7 +352,7 @@ var finder = (function(){
 		for( i = sels.length; i--; ){
 			oSel.push( parseQuery( sels[i] ) );
 		}
-		console.log("### oSel", oSel);
+		//console.log("### oSel", oSel);
 		ret = [];
 		// TODO:native 처리
 		if( oSel.length == 1 && oSel[0].length == 1 && ( key = oSel[0][0].charAt(0) ) ){
