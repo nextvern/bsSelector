@@ -119,9 +119,10 @@ var echo = function(target, filter, parentName) {
 //})();
 
 var finder = (function(){
-	var bsel, parseQuery, compareEl, rTag;
+	var bsel, parseQuery, compareEl, rTag, rAlpha;
 
-	rTag = /[a-z]/i,
+	rTag = /^[a-z]+[0-9]*$/i,
+	rAlpha = /[a-z]/i,
 	parseQuery = function(s){
 		var tokens, token, key, i, t0, t1, f0, f1;
 		tokens = [];
@@ -342,7 +343,7 @@ var finder = (function(){
 	})();
 	return function finder($s){
 		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
-			key, hit, token, tokens;
+			tags, key, hit, token, tokens;
 		//console.log('############', $s);
 		doc = document,
 		finder.lastQuery = $s;
@@ -354,54 +355,66 @@ var finder = (function(){
 		}
 		//console.log("### oSel", oSel);
 		// TODO:native 처리
-		if( oSel.length == 1 && oSel[0].length == 1 && ( key = oSel[0][0].charAt(0) ) ){
-			if( key == '#' )
-				return [doc.getElementById( $s.substr(1) )];
-			else if( key == '.' && doc.getElementsByClassName )
-				return doc.getElementsByClassName( $s.substr(1) );
-			else if( rTag.test( $s ) )
-				return doc.getElementsByTagName( $s );
-		}
+		if( oSel.length == 1 ){ // ,가 없을 경우
+			if( oSel[0].length == 1 ){
+				if( ( key = oSel[0][0].charAt(0) ) == '#' )
+					return [doc.getElementById( $s.substr(1) )];
+				else if( key == '.' && doc.getElementsByClassName )
+					return doc.getElementsByClassName( $s.substr(1) );
+				else if( rTag.test( $s ) )
+					return doc.getElementsByTagName( $s );
+			}else{
+				if( ( key = oSel[0][0].charAt(0) ) == '#' )
+					els = [doc.getElementById( oSel[0][0].substr(1) )];
+				else if( key == '.' && doc.getElementsByClassName )
+					els = doc.getElementsByClassName( oSel[0][0].substr(1) );
+				else if( rTag.test( oSel[0][0] ) )
+					els = doc.getElementsByTagName( oSel[0][0] );
+				else
+					els = doc.getElementsByTagName('*');
+			}
+		}else els = doc.getElementsByTagName('*');
+		
 		ret = [];
 		//if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
-		if( els = doc.getElementsByTagName('*') ){
-			for( i = 0, j = els.length; i < j; i++ ){
-				hit = 0;
-				for( k = oSel.length; k--; ){
-					tokens = oSel[k];
-					el = els[i];
-					for( m = 0, n = tokens.length; m < n; m++ ){// 
-						token = tokens[m];
-						key = token.charAt(0);
-						if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
-							m++;
-							while( el = el.parentNode ){
-								if( hit = compareEl(el, tokens[m]) ) break;
-							}
-						}else if( key == '>' ){ // immediate parent
-							hit = compareEl(el = el.parentNode, tokens[++m]);
-						}else if( key == '+' ){ // has immediate nextsibling
-							while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
-							hit = el && compareEl( el, tokens[++m] );
-						}else if( key == '~' ){ // has any nextsibling
-							m++;
-							while( el = el.previousSibling ){
-								if( el.nodeType == 1 && compareEl( el, tokens[m] ) ){
-									hit = 1; break;
-								}
-							}
-						}else{
-							hit = compareEl(el, token);
+		//if( els = doc.getElementsByTagName(tags) ){
+		for( i = 0, j = els.length; i < j; i++ ){
+			hit = 0;
+			for( k = oSel.length; k--; ){
+				tokens = oSel[k];
+				el = els[i];
+				for( m = 0, n = tokens.length; m < n; m++ ){// 
+					token = tokens[m];
+					//key = token.charAt(0);
+					if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
+						m++;
+						while( el = el.parentNode ){
+							if( hit = compareEl(el, tokens[m]) ) break;
 						}
-						if( !hit ) break; // 여긴 AND 연산
-						//console.log(key);
+					}else if( key == '>' ){ // immediate parent
+						hit = compareEl(el = el.parentNode, tokens[++m]);
+					}else if( key == '+' ){ // has immediate nextsibling
+						while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
+						hit = el && compareEl( el, tokens[++m] );
+					}else if( key == '~' ){ // has any nextsibling
+						m++;
+						while( el = el.previousSibling ){
+							if( el.nodeType == 1 && compareEl( el, tokens[m] ) ){
+								hit = 1; break;
+							}
+						}
+					}else{
+						hit = compareEl(el, token);
 					}
-					if( hit ) break; // 여긴 OR 연산
+					if( !hit ) break; // 여긴 AND 연산
+					//console.log(key);
 				}
+				if( hit ) break; // 여긴 OR 연산
+			}
 				//console.log(hit.length)
 				if( hit ) ret.push(els[i]);
 			}
-		}
+		//}
 		//echo(ret[0]);
 		return ret;
 	}
