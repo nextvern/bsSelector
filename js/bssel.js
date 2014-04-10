@@ -148,7 +148,7 @@ var finder = (function(){
 					tokens.push(key);
 				}else if( key == '#' || key == '.' || key == ':' || key == '[' || !i ){
 					if( token ) tokens.push(token), token = '';
-				}
+				}else if( s.charAt(i-1) == ' ' ) tokens.push(token), token = '';
 			}
 		}
 		//console.log(tokens);
@@ -379,13 +379,13 @@ var finder = (function(){
 		//if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
 		//if( els = doc.getElementsByTagName(tags) ){
 		for( i = 0, j = els.length; i < j; i++ ){
-			hit = 0;
+			//hit = 0;
 			for( k = oSel.length; k--; ){
 				tokens = oSel[k];
 				el = els[i];
 				for( m = 0, n = tokens.length; m < n; m++ ){// 
 					token = tokens[m];
-					//key = token.charAt(0);
+					hit = 0;
 					if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
 						m++;
 						while( el = el.parentNode ){
