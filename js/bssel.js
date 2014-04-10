@@ -25,7 +25,6 @@ var bssel = (function(){
 'use strict';
 var isQS;
 isQS = ( typeof document.querySelectorAll == 'function' ); // <= IE8
-var isIE7;
 var echo = function(target, filter, parentName) {
 	var k;
 	if (parentName && (typeof parentName != "string" || typeof parentName == "string" && (parentName.split(".").length + parentName.split("]").length) > 3)) return;
@@ -54,74 +53,75 @@ var echo = function(target, filter, parentName) {
 		}
 	}
 };
-var CSSSelectors = {
-	'CSS1': {
-		'Type': ['E'],
-		'ID': ['E#ElementID'],
-		'Class': ['E.classname'],
-		'Descendant combination': ['E F'],
-		'User action pseudo-class': ['E:active'],
-		'Link history pseudo-class': ['E:link']
-	},
-	'CSS2': {
-		'Universal': ['*'],
-		'User action pseudo-class': ['E:hover', 'E:focus'],
-		'Dir pseudo-class': ['E:dir(ltr)'],
-		'Lang pseudo-class': ['E:lang(en)'],
-		'Attribute': ['E[foobar]', 'E[foo=\'bar\']', 'E[foo~=\'bar\']', 'E[foo|=\'en\']'],
-		'Structural pseudo-class': ['E:first-child'],
-		'Child combination': ['E > F'],
-		'Adjacent sibling combination': ['E + F']
-	},
-	'CSS3': {
-		'Negation pseudo-class': ['E:not(s)'],
-		'Target pseudo-class': ['E:target'],
-		'Scope pseudo-class': ['E:scope'],
-		'Enabled and Disabled pseudo-class': ['E:enabled', 'E:disabled'],
-		'Selected-option pseudo-class': ['E:checked'],
-		'Structural pseudo-class': ['E:root', 'E:empty', 'E:last-child', 'E:only-child', 'E:first-of-type', 'E:last-of-type', 'E:only-of-type', 'E:nth-child(n)', 'E:nth-last-child(n)', 'E:nth-of-type(n)', 'E:nth-last-of-type(n)'],
-		'Attribute': ['E[foo^=\'bar\']', 'E[foo$=\'bar\']', 'E[foo*=\'bar\']'],
-		'General sibling combinator': ['E ~ F']
-	},
-	'CSS4': {
-		'Negation pseudo-class': ['E:not(s1, s2)'],
-		'Matches-any pseudo-class': ['E:matches(s1, s2)'],
-		'Local link pseudo-class': ['E:local-link'],
-		'Time-dimensional pseudo-class': ['E:current'],
-		'Indeterminate-value pseudo-class': ['E:indeterminate'],
-		'Default option pseudo-class': ['E:default'],
-		'Validity pseudo-class': ['E:in-range', 'E:out-of-range'],
-		'Optionality pseudo-class': ['E:required', 'E:optional'],
-		'Mutability pseudo-class': ['E:read-only', 'E:read-write'],
-		'Structural pseudo-class': ['E:nth-match(n of selector)'],
-		'Grid-Structural pseudo-class': ['E:column(selector)', 'E:nth-column(n)', 'E:nth-last-column(n)'],
-		'Attribute case-sensitivity': ['E[foo=\'bar\' i]'],
-		'Reference combination': ['E /foo/ F'],
-		'Subject of a selector with Child combinator': ['E! > F'],
-		'Hyperlink pseudo-class': ['E:any-link'],
-		'Dir pseudo-class': ['E:dir(*)']
-	}
-};
-var DETECT;
-(function(){
-	var k, kk, i;
-	if( !isQS ) return;
-	DETECT = {};
-	for( k in CSSSelectors ){
-		DETECT[k] = {};
-		for( kk in CSSSelectors[k] ){
-			DETECT[k][kk] = [];
-			for( i=0; i < CSSSelectors[k][kk].length; i++ ){
-				try{document.querySelector(CSSSelectors[k][kk][i]),DETECT[k][kk].push(1);}catch(e){DETECT[k][kk].push(0);}
-			};
-		}
-	}
-	//console.log(DETECT);
-})();
+//var CSSSelectors = {
+//	'CSS1': {
+//		'Type': ['E'],
+//		'ID': ['E#ElementID'],
+//		'Class': ['E.classname'],
+//		'Descendant combination': ['E F'],
+//		'User action pseudo-class': ['E:active'],
+//		'Link history pseudo-class': ['E:link']
+//	},
+//	'CSS2': {
+//		'Universal': ['*'],
+//		'User action pseudo-class': ['E:hover', 'E:focus'],
+//		'Dir pseudo-class': ['E:dir(ltr)'],
+//		'Lang pseudo-class': ['E:lang(en)'],
+//		'Attribute': ['E[foobar]', 'E[foo=\'bar\']', 'E[foo~=\'bar\']', 'E[foo|=\'en\']'],
+//		'Structural pseudo-class': ['E:first-child'],
+//		'Child combination': ['E > F'],
+//		'Adjacent sibling combination': ['E + F']
+//	},
+//	'CSS3': {
+//		'Negation pseudo-class': ['E:not(s)'],
+//		'Target pseudo-class': ['E:target'],
+//		'Scope pseudo-class': ['E:scope'],
+//		'Enabled and Disabled pseudo-class': ['E:enabled', 'E:disabled'],
+//		'Selected-option pseudo-class': ['E:checked'],
+//		'Structural pseudo-class': ['E:root', 'E:empty', 'E:last-child', 'E:only-child', 'E:first-of-type', 'E:last-of-type', 'E:only-of-type', 'E:nth-child(n)', 'E:nth-last-child(n)', 'E:nth-of-type(n)', 'E:nth-last-of-type(n)'],
+//		'Attribute': ['E[foo^=\'bar\']', 'E[foo$=\'bar\']', 'E[foo*=\'bar\']'],
+//		'General sibling combinator': ['E ~ F']
+//	},
+//	'CSS4': {
+//		'Negation pseudo-class': ['E:not(s1, s2)'],
+//		'Matches-any pseudo-class': ['E:matches(s1, s2)'],
+//		'Local link pseudo-class': ['E:local-link'],
+//		'Time-dimensional pseudo-class': ['E:current'],
+//		'Indeterminate-value pseudo-class': ['E:indeterminate'],
+//		'Default option pseudo-class': ['E:default'],
+//		'Validity pseudo-class': ['E:in-range', 'E:out-of-range'],
+//		'Optionality pseudo-class': ['E:required', 'E:optional'],
+//		'Mutability pseudo-class': ['E:read-only', 'E:read-write'],
+//		'Structural pseudo-class': ['E:nth-match(n of selector)'],
+//		'Grid-Structural pseudo-class': ['E:column(selector)', 'E:nth-column(n)', 'E:nth-last-column(n)'],
+//		'Attribute case-sensitivity': ['E[foo=\'bar\' i]'],
+//		'Reference combination': ['E /foo/ F'],
+//		'Subject of a selector with Child combinator': ['E! > F'],
+//		'Hyperlink pseudo-class': ['E:any-link'],
+//		'Dir pseudo-class': ['E:dir(*)']
+//	}
+//};
+//var DETECT;
+//(function(){
+//	var k, kk, i;
+//	if( !isQS ) return;
+//	DETECT = {};
+//	for( k in CSSSelectors ){
+//		DETECT[k] = {};
+//		for( kk in CSSSelectors[k] ){
+//			DETECT[k][kk] = [];
+//			for( i=0; i < CSSSelectors[k][kk].length; i++ ){
+//				try{document.querySelector(CSSSelectors[k][kk][i]),DETECT[k][kk].push(1);}catch(e){DETECT[k][kk].push(0);}
+//			};
+//		}
+//	}
+//	//console.log(DETECT);
+//})();
 
 var finder = (function(){
-	var bsel, parseQuery, compareEl, r0;
+	var bsel, parseQuery, compareEl, rTag;
 
+	rTag = /[a-z]/i,
 	parseQuery = function(s){
 		var tokens, token, key, i, t0, t1, f0, f1;
 		tokens = [];
@@ -145,7 +145,7 @@ var finder = (function(){
 					if( bs.trim(token) ) tokens.push(token), token = '';
 					if( tokens[tokens.length-1] == ' ' ) tokens.pop();
 					tokens.push(key);
-				}else if( key == '.' || key == ':' || key == '[' || !i ){
+				}else if( key == '#' || key == '.' || key == ':' || key == '[' || !i ){
 					if( token ) tokens.push(token), token = '';
 				}
 			}
@@ -353,18 +353,18 @@ var finder = (function(){
 			oSel.push( parseQuery( sels[i] ) );
 		}
 		//console.log("### oSel", oSel);
-		ret = [];
 		// TODO:native 처리
 		if( oSel.length == 1 && oSel[0].length == 1 && ( key = oSel[0][0].charAt(0) ) ){
 			if( key == '#' )
-				ret.push( doc.getElementById( $s ) );
+				return [doc.getElementById( $s.substr(1) )];
 			else if( key == '.' && doc.getElementsByClassName )
-				ret = doc.getElementsByClassName( $s );
-			else if( (/[a-z]/i).test( $s ) )
-				ret = doc.getElementsByTagName( $s );
+				return doc.getElementsByClassName( $s.substr(1) );
+			else if( rTag.test( $s ) )
+				return doc.getElementsByTagName( $s );
 		}
-		if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
-		if( !ret.length && ( els = doc.getElementsByTagName('*') ) ){
+		ret = [];
+		//if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
+		if( els = doc.getElementsByTagName('*') ){
 			for( i = 0, j = els.length; i < j; i++ ){
 				hit = 0;
 				for( k = oSel.length; k--; ){
