@@ -119,10 +119,11 @@ var echo = function(target, filter, parentName) {
 //})();
 
 var finder = (function(){
-	var bsel, parseQuery, compareEl, rTag, rAlpha;
+	var bsel, parseQuery, compareEl, rTag, rAlpha, rClId;
 
 	rTag = /^[a-z]+[0-9]*$/i,
 	rAlpha = /[a-z]/i,
+	rClId = /^[.#]?[a-z0-9]+$/i,
 	parseQuery = function(s){
 		var tokens, token, key, i, t0, t1, f0, f1;
 		tokens = [];
@@ -220,7 +221,7 @@ var finder = (function(){
 				opIdx = key.indexOf('=');
 				op = opIdx > -1 ? key.charAt(opIdx-1) : null;
 				val = key.split('=');
-				key = opIdx > -1 ? (op == '~' || op == '|' || op == '^' || op == '$' || op == '*' ? val[0].substring(0, opIdx-1) : val[0]) : key;
+				key = opIdx > -1 ? (op == '~' || op == '|' || op == '!' || op == '^' || op == '$' || op == '*' ? val[0].substring(0, opIdx-1) : val[0]) : key;
 				val = opIdx > -1 ? val[1].replace(r0, ''):null;
 				if( opIdx < 0 ){
 					if( el.getAttribute(key) !== null ) return 1;
@@ -237,6 +238,8 @@ var finder = (function(){
 						if( key.lastIndexOf(val) == ( key.length - val.length ) ) return 1;
 					}else if( op == '*' ){ // substring with
 						if( key.indexOf(val) > -1 ) return 1;
+					}else if( op == '!' ){
+						if( key !== val ) return 1;
 					}else{
 						if( key === val ) return 1;
 					}
@@ -348,6 +351,14 @@ var finder = (function(){
 		doc = document,
 		finder.lastQuery = $s;
 		if( !bs.trim($s) ) return;
+		if( rClId.test($s) ){
+			if( ( key = $s.charAt(0) ) == '#' )
+				return [doc.getElementById( $s.substr(1) )];
+			else if( key == '.' && doc.getElementsByClassName )
+				return doc.getElementsByClassName( $s.substr(1) );
+			else if( rTag.test( $s ) )
+				return doc.getElementsByTagName( $s );
+		}
 		oSel = [],
 		sels = bs.trim( $s.split(',') );
 		for( i = sels.length; i--; ){
@@ -356,6 +367,17 @@ var finder = (function(){
 		//console.log("### oSel", oSel);
 		// TODO:native 처리
 		if( oSel.length == 1 ){ // ,가 없을 경우
+			if( ( key = oSel[0][0].charAt(0) ) == '#' )
+				els = [doc.getElementById( oSel[0][0].substr(1) )];
+			else if( key == '.' && doc.getElementsByClassName )
+				els = doc.getElementsByClassName( oSel[0][0].substr(1) );
+			else if( rTag.test( oSel[0][0] ) )
+				els = doc.getElementsByTagName( oSel[0][0] );
+			else
+				els = doc.getElementsByTagName('*');
+		}else els = doc.getElementsByTagName('*');
+		
+		/*if( oSel.length == 1 ){ // ,가 없을 경우
 			if( oSel[0].length == 1 ){
 				if( ( key = oSel[0][0].charAt(0) ) == '#' )
 					return [doc.getElementById( $s.substr(1) )];
@@ -373,7 +395,7 @@ var finder = (function(){
 				else
 					els = doc.getElementsByTagName('*');
 			}
-		}else els = doc.getElementsByTagName('*');
+		}else els = doc.getElementsByTagName('*');*/
 		
 		ret = [];
 		//if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
