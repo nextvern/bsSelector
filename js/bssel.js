@@ -315,7 +315,7 @@ var finder = (function(){
 	})();
 	return function finder($s){
 		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
-			tags, key, hit, token, tokens, l2r;
+			tags, key, hit, token, tokens, l2r, isAll;
 		//console.log('############', $s);
 		doc = document,
 		finder.lastQuery = $s;
@@ -337,34 +337,39 @@ var finder = (function(){
 		// TODO:native 처리
 		if( oSel.length == 1 ){ // ,가 없을 경우
 			if( ( key = oSel[0][0].charAt(0) ) == '#' ){
-				els = [doc.getElementById( oSel[0][0].substr(1) )];
+				els = [doc.getElementById( oSel[0][0].substr(1) )],
+				oSel[0].shift();
 			}
 			else if( key == '.' && doc.getElementsByClassName ){
-				els = doc.getElementsByClassName( oSel[0][0].substr(1) );
+				els = doc.getElementsByClassName( oSel[0][0].substr(1) ),
+				oSel[0].shift();
 			}
 			else if( key == '[' || key == ':' ){
 				if( !hasParent ){
 					els = oSel[0][oSel[0].length-1];
 					if( ( key = els.charAt(0) ) == '#' )
-						els = [doc.getElementById( els.substr(1) )];
+						els = [doc.getElementById( els.substr(1) )],
+						oSel[0].pop();
 					else if( key == '.' )
-						els = doc.getElementsByClassName( els.substr(1) );
+						els = doc.getElementsByClassName( els.substr(1) ),
+						oSel[0].pop();
 					else if( rTag.test( els ) )
-						els = doc.getElementsByTagName( els );
+						els = doc.getElementsByTagName( els ),
+						oSel[0].pop();
 					else
-						els = doc.getElementsByTagName('*');
+						isAll = 1, els = doc.getElementsByTagName('*');
 				}
 				else
-					els = doc.getElementsByTagName('*');
+					isAll = 1, els = doc.getElementsByTagName('*');
 			}
 			else if( rTag.test( oSel[0][0] ) )
-				els = doc.getElementsByTagName( oSel[0][0] );
-			else els = doc.getElementsByTagName('*');
-		}else els = doc.getElementsByTagName('*');
-		
+				els = doc.getElementsByTagName( oSel[0][0] ),
+				oSel[0].shift();
+			else isAll = 1, els = doc.getElementsByTagName('*');
+		}else isAll = 1, els = doc.getElementsByTagName('*');
+
 		ret = [];
-		//if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
-		//if( els = doc.getElementsByTagName(tags) ){
+		//console.log(els.length)
 		for( i = 0, j = els.length; i < j; i++ ){
 			//hit = 0;
 			for( k = oSel.length; k--; ){
@@ -372,6 +377,7 @@ var finder = (function(){
 				el = els[i];
 				if( !l2r ){ // 후방탐색
 					for( m = 0, n = tokens.length; m < n; m++ ){
+						//console.log('abc')
 						token = tokens[m];
 						hit = 0;
 						if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
