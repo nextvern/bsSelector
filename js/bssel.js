@@ -53,84 +53,23 @@ var echo = function(target, filter, parentName) {
 		}
 	}
 };
-//var CSSSelectors = {
-//	'CSS1': {
-//		'Type': ['E'],
-//		'ID': ['E#ElementID'],
-//		'Class': ['E.classname'],
-//		'Descendant combination': ['E F'],
-//		'User action pseudo-class': ['E:active'],
-//		'Link history pseudo-class': ['E:link']
-//	},
-//	'CSS2': {
-//		'Universal': ['*'],
-//		'User action pseudo-class': ['E:hover', 'E:focus'],
-//		'Dir pseudo-class': ['E:dir(ltr)'],
-//		'Lang pseudo-class': ['E:lang(en)'],
-//		'Attribute': ['E[foobar]', 'E[foo=\'bar\']', 'E[foo~=\'bar\']', 'E[foo|=\'en\']'],
-//		'Structural pseudo-class': ['E:first-child'],
-//		'Child combination': ['E > F'],
-//		'Adjacent sibling combination': ['E + F']
-//	},
-//	'CSS3': {
-//		'Negation pseudo-class': ['E:not(s)'],
-//		'Target pseudo-class': ['E:target'],
-//		'Scope pseudo-class': ['E:scope'],
-//		'Enabled and Disabled pseudo-class': ['E:enabled', 'E:disabled'],
-//		'Selected-option pseudo-class': ['E:checked'],
-//		'Structural pseudo-class': ['E:root', 'E:empty', 'E:last-child', 'E:only-child', 'E:first-of-type', 'E:last-of-type', 'E:only-of-type', 'E:nth-child(n)', 'E:nth-last-child(n)', 'E:nth-of-type(n)', 'E:nth-last-of-type(n)'],
-//		'Attribute': ['E[foo^=\'bar\']', 'E[foo$=\'bar\']', 'E[foo*=\'bar\']'],
-//		'General sibling combinator': ['E ~ F']
-//	},
-//	'CSS4': {
-//		'Negation pseudo-class': ['E:not(s1, s2)'],
-//		'Matches-any pseudo-class': ['E:matches(s1, s2)'],
-//		'Local link pseudo-class': ['E:local-link'],
-//		'Time-dimensional pseudo-class': ['E:current'],
-//		'Indeterminate-value pseudo-class': ['E:indeterminate'],
-//		'Default option pseudo-class': ['E:default'],
-//		'Validity pseudo-class': ['E:in-range', 'E:out-of-range'],
-//		'Optionality pseudo-class': ['E:required', 'E:optional'],
-//		'Mutability pseudo-class': ['E:read-only', 'E:read-write'],
-//		'Structural pseudo-class': ['E:nth-match(n of selector)'],
-//		'Grid-Structural pseudo-class': ['E:column(selector)', 'E:nth-column(n)', 'E:nth-last-column(n)'],
-//		'Attribute case-sensitivity': ['E[foo=\'bar\' i]'],
-//		'Reference combination': ['E /foo/ F'],
-//		'Subject of a selector with Child combinator': ['E! > F'],
-//		'Hyperlink pseudo-class': ['E:any-link'],
-//		'Dir pseudo-class': ['E:dir(*)']
-//	}
-//};
-//var DETECT;
-//(function(){
-//	var k, kk, i;
-//	if( !isQS ) return;
-//	DETECT = {};
-//	for( k in CSSSelectors ){
-//		DETECT[k] = {};
-//		for( kk in CSSSelectors[k] ){
-//			DETECT[k][kk] = [];
-//			for( i=0; i < CSSSelectors[k][kk].length; i++ ){
-//				try{document.querySelector(CSSSelectors[k][kk][i]),DETECT[k][kk].push(1);}catch(e){DETECT[k][kk].push(0);}
-//			};
-//		}
-//	}
-//	//console.log(DETECT);
-//})();
 
+// 본체
 var finder = (function(){
-	var parseQuery, compareEl, rTag, rAlpha, rClId;
+	var parseQuery, compareEl, rTag, rAlpha, rClId, hasParent, nParent;
 
+	nParent = ' >',
 	rTag = /^[a-z]+[0-9]*$/i,
 	rAlpha = /[a-z]/i,
 	rClId = /^[.#]?[a-z0-9]+$/i,
 	parseQuery = function(s){
-		var tokens, token, key, i, t0, t1, f0, f1;
-		tokens = [];
-		token = '';
+		var tokens, token, key, i, t0, t1, f0;
+		tokens = [],
+		token = '',
 		i = s.length;
 		while( i-- ){
 			key = s.charAt(i);
+			if( nParent.indexOf(key) > -1 ) hasParent = 1;
 			if( key == '[' || key == '(' ) f0 = 0;
 			else if( key == ']' || key == ')' ){ f0 = 1;continue; }
 
@@ -156,51 +95,76 @@ var finder = (function(){
 		return tokens;
 	},
 	compareEl = (function(){
-		var r0, pEl, _bNth, _nthOf, _lastNthOf, _nthOfType, _lastNthOfType;
+		var r0, _nthOf, _lastNthOf, _nthOfType, _lastNthOfType;
 		r0 = /"|'/g, //"
-		_bNth = function(el){
-			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
-			return 1;
-		},
 		_nthOf = function _nthOf(el, nth){
-			var typeIdx, i, j;
-			if( !_bNth( el ) ) return 0;
+			var typeIdx, i, j, pEl;
+			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
+			//if( !_bNth( el ) ) return 0;
 			i = 0, typeIdx = 0, j = pEl.length;
 			while( i < j ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && ++typeIdx
-					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' ){
+					++typeIdx;
+					if( el == pEl[i] ){
+						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
+						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
+						else if( nth == 'n' ) return 1;
+						else return typeIdx == nth;
+					}
+				}
 				i++;
 			}
 			return 0;
 		},
 		_lastNthOf = function(el, nth){
-			var typeIdx, i;
-			if( !_bNth( el ) ) return 0;
+			var typeIdx, i, pEl;
+			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
 			i = pEl.length, typeIdx = 0;
 			while( i-- ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && ++typeIdx
-					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' ){
+					++typeIdx;
+					if( el == pEl[i] ){
+						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
+						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
+						else if( nth == 'n' ) return 1;
+						else return typeIdx == nth;
+					}
+				}
 			}
 			return 0;
 		},
 		_nthOfType = function _nthOfType(el, nth){
-			var typeIdx, i, j;
-			if( !_bNth( el ) ) return 0;
+			var typeIdx, i, j, pEl;
+			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
 			i = 0, typeIdx = 0, j = pEl.length;
 			while( i < j ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName && ++typeIdx
-					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName ){
+					++typeIdx;
+					if( el == pEl[i] ){
+						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
+						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
+						else if( nth == 'n' ) return 1;
+						else return typeIdx == nth;
+					}
+				}
 				i++;
 			}
 			return 0;
 		},
 		_lastNthOfType = function _lastNthOfType(el, nth){
-			var typeIdx, i;
-			if( !_bNth( el ) ) return 0;
+			var typeIdx, i, pEl;
+			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
 			i = pEl.length, typeIdx = 0;
 			while( i-- ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName && ++typeIdx
-					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName ){
+					++typeIdx;
+					if( el == pEl[i] ){
+						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
+						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
+						else if( nth == 'n' ) return 1;
+						else return typeIdx == nth;
+					}
+				}
 			}
 			return 0;
 		};
@@ -372,54 +336,31 @@ var finder = (function(){
 		//console.log("### oSel", oSel);
 		// TODO:native 처리
 		if( oSel.length == 1 ){ // ,가 없을 경우
-			if( ( key = oSel[0][0].charAt(0) ) == '#' )
+			if( ( key = oSel[0][0].charAt(0) ) == '#' ){
 				els = [doc.getElementById( oSel[0][0].substr(1) )];
-			else if( key == '.' && doc.getElementsByClassName )
-				els = doc.getElementsByClassName( oSel[0][0].substr(1) );
-			else if( rTag.test( oSel[0][0] ) )
-				els = doc.getElementsByTagName( oSel[0][0] );
-			/*else if( key == '[' || key == ':' ){
-				if( oSel[0].length > 1 ){
-					els = oSel[0][oSel[0].length-1];
-					if( ( key = els.charAt(0) ) == '#' ){
-						
-					}
-						
-				}else{
-					els = doc.getElementsByTagName('*');
-				}
-			}*/
-			else
-				els = doc.getElementsByTagName('*');
-			
-			/*i = oSel[0].length, l2r = 0;
-			while(i--){
-				if( !( oSel[0][i] == ' ' || rTag.test( oSel[0][i] ) ) ) break;
 			}
-			if( i != 0 ){
-				
-			}*/
-		}else els = doc.getElementsByTagName('*');
-		
-		/*if( oSel.length == 1 ){ // ,가 없을 경우
-			if( oSel[0].length == 1 ){
-				if( ( key = oSel[0][0].charAt(0) ) == '#' )
-					return [doc.getElementById( $s.substr(1) )];
-				else if( key == '.' && doc.getElementsByClassName )
-					return doc.getElementsByClassName( $s.substr(1) );
-				else if( rTag.test( $s ) )
-					return doc.getElementsByTagName( $s );
-			}else{
-				if( ( key = oSel[0][0].charAt(0) ) == '#' )
-					els = [doc.getElementById( oSel[0][0].substr(1) )];
-				else if( key == '.' && doc.getElementsByClassName )
-					els = doc.getElementsByClassName( oSel[0][0].substr(1) );
-				else if( rTag.test( oSel[0][0] ) )
-					els = doc.getElementsByTagName( oSel[0][0] );
+			else if( key == '.' && doc.getElementsByClassName ){
+				els = doc.getElementsByClassName( oSel[0][0].substr(1) );
+			}
+			else if( key == '[' || key == ':' ){
+				if( !hasParent ){
+					els = oSel[0][oSel[0].length-1];
+					if( ( key = els.charAt(0) ) == '#' )
+						els = [doc.getElementById( els.substr(1) )];
+					else if( key == '.' )
+						els = doc.getElementsByClassName( els.substr(1) );
+					else if( rTag.test( els ) )
+						els = doc.getElementsByTagName( els );
+					else
+						els = doc.getElementsByTagName('*');
+				}
 				else
 					els = doc.getElementsByTagName('*');
 			}
-		}else els = doc.getElementsByTagName('*');*/
+			else if( rTag.test( oSel[0][0] ) )
+				els = doc.getElementsByTagName( oSel[0][0] );
+			else els = doc.getElementsByTagName('*');
+		}else els = doc.getElementsByTagName('*');
 		
 		ret = [];
 		//if( isQS ) try{ret = doc.querySelectorAll($s);}catch(err){};
