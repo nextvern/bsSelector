@@ -119,7 +119,7 @@ var echo = function(target, filter, parentName) {
 //})();
 
 var finder = (function(){
-	var bsel, parseQuery, compareEl, rTag, rAlpha, rClId;
+	var parseQuery, compareEl, rTag, rAlpha, rClId;
 
 	rTag = /^[a-z]+[0-9]*$/i,
 	rAlpha = /[a-z]/i,
@@ -156,7 +156,7 @@ var finder = (function(){
 		return tokens;
 	},
 	compareEl = (function(){
-		var r0, pEl, _bNth, _nthOf, _lastNthOf, _nthOfType, _lastNthOfType, _hasCls;
+		var r0, pEl, _bNth, _nthOf, _lastNthOf, _nthOfType, _lastNthOfType;
 		r0 = /"|'/g, //"
 		_bNth = function(el){
 			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
@@ -167,7 +167,8 @@ var finder = (function(){
 			if( !_bNth( el ) ) return 0;
 			i = 0, typeIdx = 0, j = pEl.length;
 			while( i < j ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && ++typeIdx && ( nth == 'even' ? ( typeIdx%2 == 0 ) : nth == 'odd' ? ( typeIdx%2 == 1 ) : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && ++typeIdx
+					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
 				i++;
 			}
 			return 0;
@@ -177,7 +178,8 @@ var finder = (function(){
 			if( !_bNth( el ) ) return 0;
 			i = pEl.length, typeIdx = 0;
 			while( i-- ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && ++typeIdx && ( nth == 'even' ? ( typeIdx%2 == 0 ) : nth == 'odd' ? ( typeIdx%2 == 1 ) : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && ++typeIdx
+					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
 			}
 			return 0;
 		},
@@ -186,7 +188,8 @@ var finder = (function(){
 			if( !_bNth( el ) ) return 0;
 			i = 0, typeIdx = 0, j = pEl.length;
 			while( i < j ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName && ++typeIdx && ( nth == 'even' ? ( typeIdx%2 == 0 ) : nth == 'odd' ? ( typeIdx%2 == 1 ) : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName && ++typeIdx
+					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
 				i++;
 			}
 			return 0;
@@ -196,25 +199,22 @@ var finder = (function(){
 			if( !_bNth( el ) ) return 0;
 			i = pEl.length, typeIdx = 0;
 			while( i-- ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName && ++typeIdx && ( nth == 'even' ? ( typeIdx%2 == 0 ) : nth == 'odd' ? ( typeIdx%2 == 1 ) : (typeIdx == nth) ) && el == pEl[i] ) return 1;
+				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName && ++typeIdx
+					&& ( nth == 'even' || nth == '2n' ? ( typeIdx%2 == 0 ) : nth == 'odd' || nth == '2n+1' ? ( typeIdx%2 == 1 ) : nth == 'n' ? 1 : (typeIdx == nth) ) && el == pEl[i] ) return 1;
 			}
-			return 0;
-		},
-		_hasCls = function _hasCls(key, clsNm){
-			var i;
-			if( !clsNm ) return 0;
-			clsNm = bs.trim( clsNm.split(' ') );
-			for( i = clsNm.length; i--; )	if( key == clsNm[i] ) return 1;
 			return 0;
 		};
 		return function(el, token){
-			var key, val, opIdx, op, i, j;
+			var key, val, opIdx, op, i, j, clsNm;
 			if( ( key = token.charAt(0) ) == '#' ){
 				key = token.substr(1);
 				if( key == el.id ) return 1;
 			}else if( key == '.' ){
+				if( !( clsNm = el.className ) ) return 0;
 				key = token.substr(1);
-				return _hasCls( key, el.className );
+				clsNm = clsNm.indexOf(' ') > -1 ? bs.trim( clsNm.split(' ') ) : [clsNm];
+				for( i = clsNm.length; i--; )	if( key == clsNm[i] ) return 1;
+				return 0;
 			}else if( key == '[' ){
 				// TODO:IE7 에서 A, SCRIPT, UL, LI 등의 요소에 기본 type 속성이 생성되어있는 문제 처리(아마 outerHTML으로 해결될지도?)
 				key = token.substr(1);
@@ -233,15 +233,20 @@ var finder = (function(){
 						key = key.split('-');
 						for( i = key.length; i--; ) if( key[i] == val ) return 1;
 					}else if( op == '^' ){ // begins exactly with
-						if( !key.indexOf(val) ) return 1;
+						return !key.indexOf(val);
+						//if( !key.indexOf(val) ) return 1;
 					}else if( op == '$' ){ // end exactly with
-						if( key.lastIndexOf(val) == ( key.length - val.length ) ) return 1;
+						return key.lastIndexOf(val) == ( key.length - val.length );
+						//if( key.lastIndexOf(val) == ( key.length - val.length ) ) return 1;
 					}else if( op == '*' ){ // substring with
-						if( key.indexOf(val) > -1 ) return 1;
+						return key.indexOf(val) > -1;
+						//if( key.indexOf(val) > -1 ) return 1;
 					}else if( op == '!' ){
-						if( key !== val ) return 1;
+						return key !== val;
+						//if( key !== val ) return 1;
 					}else{
-						if( key === val ) return 1;
+						return key === val;
+						//if( key === val ) return 1;
 					}
 				}
 			}else if( key == ':' ){
@@ -339,14 +344,14 @@ var finder = (function(){
 					break;
 				}
 			}else{ // TAG 처리
-				if( token == '*' || token.toUpperCase() == el.tagName ) return 1;
+				if( token.toUpperCase() == el.tagName || token == '*' ) return 1;
 			}
 			return 0;
 		};
 	})();
 	return function finder($s){
 		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
-			tags, key, hit, token, tokens;
+			tags, key, hit, token, tokens, l2r;
 		//console.log('############', $s);
 		doc = document,
 		finder.lastQuery = $s;
@@ -373,8 +378,27 @@ var finder = (function(){
 				els = doc.getElementsByClassName( oSel[0][0].substr(1) );
 			else if( rTag.test( oSel[0][0] ) )
 				els = doc.getElementsByTagName( oSel[0][0] );
+			/*else if( key == '[' || key == ':' ){
+				if( oSel[0].length > 1 ){
+					els = oSel[0][oSel[0].length-1];
+					if( ( key = els.charAt(0) ) == '#' ){
+						
+					}
+						
+				}else{
+					els = doc.getElementsByTagName('*');
+				}
+			}*/
 			else
 				els = doc.getElementsByTagName('*');
+			
+			/*i = oSel[0].length, l2r = 0;
+			while(i--){
+				if( !( oSel[0][i] == ' ' || rTag.test( oSel[0][i] ) ) ) break;
+			}
+			if( i != 0 ){
+				
+			}*/
 		}else els = doc.getElementsByTagName('*');
 		
 		/*if( oSel.length == 1 ){ // ,가 없을 경우
@@ -405,31 +429,36 @@ var finder = (function(){
 			for( k = oSel.length; k--; ){
 				tokens = oSel[k];
 				el = els[i];
-				for( m = 0, n = tokens.length; m < n; m++ ){// 
-					token = tokens[m];
-					hit = 0;
-					if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
-						m++;
-						while( el = el.parentNode ){
-							if( hit = compareEl(el, tokens[m]) ) break;
-						}
-					}else if( key == '>' ){ // immediate parent
-						hit = compareEl(el = el.parentNode, tokens[++m]);
-					}else if( key == '+' ){ // has immediate nextsibling
-						while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
-						hit = el && compareEl( el, tokens[++m] );
-					}else if( key == '~' ){ // has any nextsibling
-						m++;
-						while( el = el.previousSibling ){
-							if( el.nodeType == 1 && compareEl( el, tokens[m] ) ){
-								hit = 1; break;
+				if( !l2r ){ // 후방탐색
+					for( m = 0, n = tokens.length; m < n; m++ ){
+						token = tokens[m];
+						hit = 0;
+						if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
+							m++;
+							while( el = el.parentNode ){
+								if( hit = compareEl(el, tokens[m]) ) break;
 							}
+						}else if( key == '>' ){ // immediate parent
+							hit = compareEl(el = el.parentNode, tokens[++m]);
+						}else if( key == '+' ){ // has immediate nextsibling
+							while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
+							hit = el && compareEl( el, tokens[++m] );
+						}else if( key == '~' ){ // has any nextsibling
+							m++;
+							while( el = el.previousSibling ){
+								if( el.nodeType == 1 && compareEl( el, tokens[m] ) ){
+									hit = 1; break;
+								}
+							}
+						}else{
+							hit = compareEl(el, token);
 						}
-					}else{
-						hit = compareEl(el, token);
+						if( !hit ) break; // 여긴 AND 연산
+						//console.log(key);
 					}
-					if( !hit ) break; // 여긴 AND 연산
-					//console.log(key);
+				}else{ // 전방탐색
+					for( m = tokens.length; m--; ){
+					}
 				}
 				if( hit ) break; // 여긴 OR 연산
 			}
