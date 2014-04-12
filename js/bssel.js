@@ -23,8 +23,9 @@ bs.trim = (function(){
 })();
 var bssel = (function(){
 'use strict';
-var isQS;
+var isQS, isClsName;
 isQS = ( typeof document.querySelectorAll == 'function' ); // <= IE8
+isClsName = ( typeof document.getElementsByClassName == 'function' );
 var echo = function(target, filter, parentName) {
 	var k;
 	if (parentName && (typeof parentName != "string" || typeof parentName == "string" && (parentName.split(".").length + parentName.split("]").length) > 3)) return;
@@ -56,12 +57,14 @@ var echo = function(target, filter, parentName) {
 
 // 본체
 var finder = (function(){
-	var parseQuery, compareEl, rTag, rAlpha, rClId, hasParent, nParent;
+	var parseQuery, compareEl, rTag, rAlpha, rClsId, hasParent, nParent, oSel, ret;
 
+	oSel = [],
+	ret = [],
 	nParent = ' >',
 	rTag = /^[a-z]+[0-9]*$/i,
 	rAlpha = /[a-z]/i,
-	rClId = /^[.#]?[a-z0-9]+$/i,
+	rClsId = /^[.#]?[a-z0-9]+$/i,
 	parseQuery = function(s){
 		var tokens, token, key, i, t0, t1, f0;
 		tokens = [],
@@ -308,27 +311,28 @@ var finder = (function(){
 					break;
 				}
 			}else{ // TAG 처리
-				if( token.toUpperCase() == el.tagName || token == '*' ) return 1;
+				return token.toUpperCase() == el.tagName || token == '*';
+				//if( token.toUpperCase() == el.tagName || token == '*' ) return 1;
 			}
 			return 0;
 		};
 	})();
 	return function finder($s){
-		var doc, nRet, ret, el, els, sels, oSel, t0, i, j, k, m, n,
-			tags, key, hit, token, tokens, l2r, isAll;
+		var doc, nRet, el, els, sels, t0, i, j, k, m, n,
+			tags, key, hit, token, tokens, l2r;
 		//console.log('############', $s);
 		doc = document,
 		finder.lastQuery = $s;
 		if( !bs.trim($s) ) return;
-		if( rClId.test($s) ){
+		if( rClsId.test($s) ){
 			if( ( key = $s.charAt(0) ) == '#' )
 				return [doc.getElementById( $s.substr(1) )];
-			else if( key == '.' && doc.getElementsByClassName )
+			else if( key == '.' && isClsName )
 				return doc.getElementsByClassName( $s.substr(1) );
 			else if( rTag.test( $s ) )
 				return doc.getElementsByTagName( $s );
 		}
-		oSel = [],
+		oSel.length = 0,
 		sels = bs.trim( $s.split(',') );
 		for( i = sels.length; i--; ){
 			oSel.push( parseQuery( sels[i] ) );
@@ -340,7 +344,7 @@ var finder = (function(){
 				els = [doc.getElementById( oSel[0][0].substr(1) )],
 				oSel[0].shift();
 			}
-			else if( key == '.' && doc.getElementsByClassName ){
+			else if( key == '.' && isClsName ){
 				els = doc.getElementsByClassName( oSel[0][0].substr(1) ),
 				oSel[0].shift();
 			}
@@ -350,25 +354,25 @@ var finder = (function(){
 					if( ( key = els.charAt(0) ) == '#' )
 						els = [doc.getElementById( els.substr(1) )],
 						oSel[0].pop();
-					else if( key == '.' )
+					else if( key == '.' && isClsName )
 						els = doc.getElementsByClassName( els.substr(1) ),
 						oSel[0].pop();
 					else if( rTag.test( els ) )
 						els = doc.getElementsByTagName( els ),
 						oSel[0].pop();
 					else
-						isAll = 1, els = doc.getElementsByTagName('*');
+						els = doc.getElementsByTagName('*');
 				}
 				else
-					isAll = 1, els = doc.getElementsByTagName('*');
+					els = doc.getElementsByTagName('*');
 			}
 			else if( rTag.test( oSel[0][0] ) )
 				els = doc.getElementsByTagName( oSel[0][0] ),
 				oSel[0].shift();
-			else isAll = 1, els = doc.getElementsByTagName('*');
-		}else isAll = 1, els = doc.getElementsByTagName('*');
+			else els = doc.getElementsByTagName('*');
+		}else els = doc.getElementsByTagName('*');
 
-		ret = [];
+		ret.length = 0;
 		//console.log(els.length)
 		for( i = 0, j = els.length; i < j; i++ ){
 			//hit = 0;
@@ -383,10 +387,10 @@ var finder = (function(){
 						if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
 							m++;
 							while( el = el.parentNode ){
-								if( hit = compareEl(el, tokens[m]) ) break;
+								if( hit = compareEl( el, tokens[m] ) ) break;
 							}
 						}else if( key == '>' ){ // immediate parent
-							hit = compareEl(el = el.parentNode, tokens[++m]);
+							hit = compareEl( el = el.parentNode, tokens[++m] );
 						}else if( key == '+' ){ // has immediate nextsibling
 							while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
 							hit = el && compareEl( el, tokens[++m] );
@@ -398,7 +402,7 @@ var finder = (function(){
 								}
 							}
 						}else{
-							hit = compareEl(el, token);
+							hit = compareEl( el, token );
 						}
 						if( !hit ) break; // 여긴 AND 연산
 						//console.log(key);
@@ -410,7 +414,8 @@ var finder = (function(){
 				if( hit ) break; // 여긴 OR 연산
 			}
 				//console.log(hit.length)
-				if( hit ) ret.push(els[i]);
+				//if( hit ) ret.push(els[i]);
+				if( hit ) ret[ret.length] = els[i];
 			}
 		//}
 		//echo(ret[0]);
