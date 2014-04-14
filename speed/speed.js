@@ -52,7 +52,7 @@ function( Benchmark, document, selectors ) {
 		useQSA = urlParams.qsa || false,
 
 		// Benchmark options
-		maxTime = 0.5,
+		maxTime = 0.1,
 		minSamples = 3,
 
 		// Keep track of all iframes
@@ -351,7 +351,7 @@ function( Benchmark, document, selectors ) {
 			var win = this,
 				select = new Function( "w", "s", "d", "return " + (engine !== "qsa" ? "w." : "") + engines[ engine ] );
 			suite.add( engine, function() {
-				returned[ engine ][ selector ] = select( win, selector, document );
+				returned[ engine ][ selector ] = select( win, selector.trim(), document );
 			});
 			if ( typeof iframeLoaded !== "undefined" ) {
 				iframeLoaded();
