@@ -1,3 +1,8 @@
+/* bsJS - OpenSource JavaScript library version 0.3.0 / 2013.12.25 by projectBS committee
+ * Copyright 2013.10 projectBS committee.
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * GitHub-http://goo.gl/FLI7te Facebook group-http://goo.gl/8s5qmQ
+ */
 /*
 	bs selector 백승현
 	bs Core가 있어야 합니다.
@@ -98,43 +103,35 @@ var finder = (function(){
 		return tokens;
 	},
 	compareEl = (function(){
-		var r0, _nthOf, _lastNthOf, _nthOfType, _lastNthOfType;
+		var r0, _nthOfType, _lastNthOfType, setIdx, setLastIdx;
 		r0 = /"|'/g, //"
-		_nthOf = function _nthOf(el, nth){
-			var typeIdx, i, j, pEl;
-			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
-			//if( !_bNth( el ) ) return 0;
-			i = 0, typeIdx = 0, j = pEl.length;
+		setIdx = function setIdx(pEl){
+			var el, els, i, j, typeIdx;
+			if( !pEl || pEl.tagName == 'HTML' ) return 0;
+			els = pEl.childNodes,
+			typeIdx = 1,
+			i = 0, j = els.length;
 			while( i < j ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' ){
-					++typeIdx;
-					if( el == pEl[i] ){
-						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
-						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
-						else if( nth == 'n' ) return 1;
-						else return typeIdx == nth;
-					}
-				}
-				i++;
+				el = els[i++];
+				if( el.nodeType == 1 )
+					el.bsRtime = finder.bsRtime,
+					el.bsIdx = typeIdx++;
 			}
-			return 0;
+			return 1;
 		},
-		_lastNthOf = function(el, nth){
-			var typeIdx, i, pEl;
-			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
-			i = pEl.length, typeIdx = 0;
+		setLastIdx = function setLastIdx(pEl){
+			var el, els, i, typeIdx;
+			if( !pEl || pEl.tagName == 'HTML' ) return 0;
+			els = pEl.childNodes,
+			typeIdx = 1,
+			i = els.length;
 			while( i-- ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' ){
-					++typeIdx;
-					if( el == pEl[i] ){
-						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
-						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
-						else if( nth == 'n' ) return 1;
-						else return typeIdx == nth;
-					}
-				}
+				el = els[i];
+				if( el.nodeType == 1 )
+					el.bsRtimeL = finder.bsRtime,
+					el.bsIdxL = typeIdx++;
 			}
-			return 0;
+			return 1;
 		},
 		_nthOfType = function _nthOfType(el, nth){
 			var typeIdx, i, j, pEl;
@@ -172,7 +169,7 @@ var finder = (function(){
 			return 0;
 		};
 		return function(el, token){
-			var key, val, opIdx, op, i, j, clsNm;
+			var key, val, opIdx, op, i, j, clsNm, elIdx, pEl;
 			if( ( key = token.charAt(0) ) == '#' ){
 				key = token.substr(1);
 				if( key == el.id ) return 1;
@@ -273,16 +270,32 @@ var finder = (function(){
 					return 0;
 					break;
 				case'first-child':
-					return _nthOf(el, 1);
+					if( !el.bsRtime || el.bsRtime != finder.bsRtime ) setIdx(el.parentNode);
+
+					return el.bsIdx == 1;
 					break;
 				case'last-child':
-					return _lastNthOf(el, 1);
+					if( !el.bsRtimeL || el.bsRtimeL != finder.bsRtime ) setLastIdx(el.parentNode);
+
+					return el.bsIdxL == 1;
 					break;
 				case'nth-child':
-					return _nthOf(el, val);
+					if( !el.bsRtime || el.bsRtime != finder.bsRtime ) setIdx(el.parentNode);
+
+					elIdx = el.bsIdx;
+					if( val == 'even' || val == '2n' ) return elIdx%2 == 0;
+					else if( val == 'odd' || val == '2n+1' ) return elIdx%2 == 1;
+					else if( val == 'n' ) return 1;
+					else return elIdx == val;
 					break;
 				case'nth-last-child':
-					return _lastNthOf(el, val);
+					if( !el.bsRtimeL || el.bsRtimeL != finder.bsRtime ) setLastIdx(el.parentNode);
+
+					elIdx = el.bsIdxL;
+					if( val == 'even' || val == '2n' ) return elIdx%2 == 0;
+					else if( val == 'odd' || val == '2n+1' ) return elIdx%2 == 1;
+					else if( val == 'n' ) return 1;
+					else return elIdx == val;
 					break;
 				case'empty':
 					if( el.nodeType == 1 && !el.nodeValue && !el.childNodes.length ) return 1;
@@ -321,6 +334,7 @@ var finder = (function(){
 		var doc, nRet, el, els, sels, t0, i, j, k, m, n,
 			tags, key, hit, token, tokens, l2r;
 		//console.log('############', $s);
+		finder.bsRtime = +new Date(),
 		doc = document,
 		finder.lastQuery = $s;
 		if( !bs.trim($s) ) return;

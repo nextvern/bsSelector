@@ -3282,11 +3282,67 @@
 	</dl>
 	<!--end-informative-->
 <script>
+document.querySelector = document.querySelectorAll = null;
+function ss(){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 ){
+		btree(document.body);
+		count++;
+	}
+	console.log(count);
+}
+function qt($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		document.querySelectorAll($s), count++;
+	console.log(count);
+}
+function st($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		Sizzle($s), count++;
+	console.log(count);
+}
+function mt($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		Slick.search(document, $s), count++;
+	console.log(count);
+}
 function bst($s){
 	var start = +new Date(), count = 0;
 	while( +new Date() - start < 1000 )
+		//bst2(), count++;
 		bssel($s), count++;
 	console.log(count);
+}
+function bst2(){
+	var els, els2, i,j,k;
+	els = document.getElementsByTagName('p');
+	els2 = document.getElementsByTagName('p');
+	for(i=els.length;i--;){
+		for(j=els2.length; j--;){
+			els[i] == els2[j];
+		}
+	}
+}
+function btree($root){
+	var el,
+		eln, elp, lastEl, i, count;
+		count = 1;
+		eln = $root.childNodes;
+	for(i=eln.length; i--;){
+		el = eln[i];
+		if(el.nodeType==1)
+			//console.log(el.tagName),
+			el.bsnum = count++;
+		if(el.childNodes && el.childNodes.length){
+			btree(el);
+		}
+	}
 }
 </script>
 </body>
