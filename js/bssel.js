@@ -103,7 +103,7 @@ var finder = (function(){
 		return tokens;
 	},
 	compareEl = (function(){
-		var r0, _nthOfType, _lastNthOfType, setIdx, setLastIdx;
+		var r0, setIdx, setLastIdx, setTypeIdx, setLastTypeIdx;
 		r0 = /"|'/g, //"
 		setIdx = function setIdx(pEl){
 			var el, els, i, j, typeIdx;
@@ -133,43 +133,36 @@ var finder = (function(){
 			}
 			return 1;
 		},
-		_nthOfType = function _nthOfType(el, nth){
-			var typeIdx, i, j, pEl;
-			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
-			i = 0, typeIdx = 0, j = pEl.length;
+		setTypeIdx = function setIdx(pEl, tagName){
+			var el, els, i, j, typeIdx;
+			if( !pEl || pEl.tagName == 'HTML' ) return 0;
+			els = pEl.childNodes,
+			typeIdx = 1,
+			i = 0, j = els.length;
 			while( i < j ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName ){
-					++typeIdx;
-					if( el == pEl[i] ){
-						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
-						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
-						else if( nth == 'n' ) return 1;
-						else return typeIdx == nth;
-					}
-				}
-				i++;
+				el = els[i++];
+				if( el.nodeType == 1 && el.tagName == tagName )
+					el.bsRtimeT = tagName + finder.bsRtime,
+					el.bsIdxT = typeIdx++;
 			}
-			return 0;
+			return 1;
 		},
-		_lastNthOfType = function _lastNthOfType(el, nth){
-			var typeIdx, i, pEl;
-			if( el.nodeType != 1 || !( pEl = el.parentNode && el.parentNode.childNodes ) || !pEl.length ) return 0;
-			i = pEl.length, typeIdx = 0;
+		setLastTypeIdx = function setLastIdx(pEl, tagName){
+			var el, els, i, typeIdx;
+			if( !pEl || pEl.tagName == 'HTML' ) return 0;
+			els = pEl.childNodes,
+			typeIdx = 1,
+			i = els.length;
 			while( i-- ){
-				if( pEl[i].nodeType == 1 && pEl[i].tagName != 'HTML' && el.tagName == pEl[i].tagName ){
-					++typeIdx;
-					if( el == pEl[i] ){
-						if( nth == 'even' || nth == '2n' ) return typeIdx%2 == 0;
-						else if( nth == 'odd' || nth == '2n+1' ) return typeIdx%2 == 1;
-						else if( nth == 'n' ) return 1;
-						else return typeIdx == nth;
-					}
-				}
+				el = els[i];
+				if( el.nodeType == 1 && el.tagName == tagName )
+					el.bsRtimeLT = tagName + finder.bsRtime,
+					el.bsIdxLT = typeIdx++;
 			}
-			return 0;
+			return 1;
 		};
 		return function(el, token){
-			var key, val, opIdx, op, i, j, clsNm, elIdx, pEl;
+			var key, val, opIdx, op, i, j, clsNm, elTagName, elIdx, pEl;
 			if( ( key = token.charAt(0) ) == '#' ){
 				key = token.substr(1);
 				if( key == el.id ) return 1;
@@ -233,24 +226,41 @@ var finder = (function(){
 					if(el.tagName == 'HTML') return 1;
 					break;
 				case'first-of-type':
-					return _nthOfType(el, 1);
+					elTagName = el.tagName;
+					if( !el.bsRtimeT || el.bsRtimeT != elTagName + finder.bsRtime ) setTypeIdx(el.parentNode, elTagName );
+					
+					return el.bsIdxT == 1;
 					break;
 				case'last-of-type':
-					return _lastNthOfType(el, 1);
+					elTagName = el.tagName;
+					if( !el.bsRtimeLT || el.bsRtimeLT != elTagName + finder.bsRtime ) setLastTypeIdx(el.parentNode, elTagName );
+					
+					return el.bsIdxLT == 1;
 					break;
 				case'nth-of-type':
-					return _nthOfType(el, val);
+					if( val == 'n' ) return 1;
+					elTagName = el.tagName;
+					if( !el.bsRtimeT || el.bsRtimeT != elTagName + finder.bsRtime ) setTypeIdx(el.parentNode, elTagName );
+					elIdx = el.bsIdxT;
+					if( val == 'even' || val == '2n' ) return elIdx%2 == 0;
+					else if( val == 'odd' || val == '2n+1' ) return elIdx%2 == 1;
+					else return elIdx == val;
 					break;
 				case'nth-last-of-type':
-					return _lastNthOfType(el, val);
+					if( val == 'n' ) return 1;
+					elTagName = el.tagName;
+					if( !el.bsRtimeLT || el.bsRtimeLT != elTagName + finder.bsRtime ) setLastTypeIdx(el.parentNode, elTagName );
+					elIdx = el.bsIdxLT;
+					if( val == 'even' || val == '2n' ) return elIdx%2 == 0;
+					else if( val == 'odd' || val == '2n+1' ) return elIdx%2 == 1;
+					else return elIdx == val;
 					break;
 				case'only-of-type':
-					if( el.nodeType != 1 ) return 0;
 					op = el.parentNode && el.parentNode.childNodes;
 					if( op && ( j = op.length ) ){
-						i = 0, opIdx = 0;
+						i = 0, opIdx = 0, elTagName = el.tagName;
 						while( i < j ){
-							if( op[i].nodeType == 1 && op[i].tagName != 'HTML' && el.tagName == op[i].tagName && ++opIdx && (val = op[i]) && opIdx > 1 ) return 0;
+							if( op[i].nodeType == 1 && elTagName != 'HTML' && elTagName == op[i].tagName && ++opIdx && (val = op[i]) && opIdx > 1 ) return 0;
 							i++;
 						}
 						if( opIdx == 1 && el == val ) return 1;
@@ -258,7 +268,6 @@ var finder = (function(){
 					return 0;
 					break;
 				case'only-child':
-					if( el.nodeType != 1 ) return 0;
 					op = el.parentNode && el.parentNode.childNodes;
 					if( op && ( i = op.length ) ){
 						opIdx = 0;
@@ -280,21 +289,21 @@ var finder = (function(){
 					return el.bsIdxL == 1;
 					break;
 				case'nth-child':
+					if( val == 'n' ) return 1;
 					if( !el.bsRtime || el.bsRtime != finder.bsRtime ) setIdx(el.parentNode);
 
 					elIdx = el.bsIdx;
 					if( val == 'even' || val == '2n' ) return elIdx%2 == 0;
 					else if( val == 'odd' || val == '2n+1' ) return elIdx%2 == 1;
-					else if( val == 'n' ) return 1;
 					else return elIdx == val;
 					break;
 				case'nth-last-child':
+					if( val == 'n' ) return 1;
 					if( !el.bsRtimeL || el.bsRtimeL != finder.bsRtime ) setLastIdx(el.parentNode);
 
 					elIdx = el.bsIdxL;
 					if( val == 'even' || val == '2n' ) return elIdx%2 == 0;
 					else if( val == 'odd' || val == '2n+1' ) return elIdx%2 == 1;
-					else if( val == 'n' ) return 1;
 					else return elIdx == val;
 					break;
 				case'empty':
@@ -302,22 +311,25 @@ var finder = (function(){
 					return 0;
 					break;
 				case'checked':
+					elTagName = el.tagName;
 					if(
-						( el.tagName == 'INPUT' && (el.getAttribute('type') == 'radio' || el.getAttribute('type') == 'checkbox' ) && el.checked == true ) ||
-						( el.tagName == 'OPTION' && el.selected == true )
+						( elTagName == 'INPUT' && (el.getAttribute('type') == 'radio' || el.getAttribute('type') == 'checkbox' ) && el.checked == true ) ||
+						( elTagName == 'OPTION' && el.selected == true )
 					) return 1;
 					return 0;
 					break;
 				case'enabled':
+					elTagName = el.tagName;
 					if(
-						(el.tagName == 'INPUT' || el.tagName == 'BUTTON' || el.tagName == 'SELECT' || el.tagName == 'OPTION' || el.tagName == 'TEXTAREA') &&
+						(elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
 						el.getAttribute('disabled') == null
 					) return 1;
 					return 0;
 					break;
 				case'disabled':
+					elTagName = el.tagName;
 					if(
-						(el.tagName == 'INPUT' || el.tagName == 'BUTTON' || el.tagName == 'SELECT' || el.tagName == 'OPTION' || el.tagName == 'TEXTAREA') &&
+						(elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
 						el.getAttribute('disabled') != null
 					) return 1;
 					return 0;
@@ -333,11 +345,11 @@ var finder = (function(){
 	return function finder($s){
 		var doc, nRet, el, els, sels, t0, i, j, k, m, n,
 			tags, key, hit, token, tokens, l2r;
-		//console.log('############', $s);
+		//console.log('############', $s, $s.length);
 		finder.bsRtime = +new Date(),
 		doc = document,
 		finder.lastQuery = $s;
-		if( !bs.trim($s) ) return;
+		//if( !( $s = bs.trim($s) ) ) return;
 		if( rClsId.test($s) ){
 			if( ( key = $s.charAt(0) ) == '#' )
 				return [doc.getElementById( $s.substr(1) )];
@@ -387,7 +399,6 @@ var finder = (function(){
 		}else els = doc.getElementsByTagName('*');
 
 		ret.length = 0;
-		//console.log(els.length)
 		for( i = 0, j = els.length; i < j; i++ ){
 			//hit = 0;
 			for( k = oSel.length; k--; ){
@@ -427,12 +438,8 @@ var finder = (function(){
 				}
 				if( hit ) break; // 여긴 OR 연산
 			}
-				//console.log(hit.length)
-				//if( hit ) ret.push(els[i]);
-				if( hit ) ret[ret.length] = els[i];
-			}
-		//}
-		//echo(ret[0]);
+			if( hit ) ret[ret.length] = els[i];
+		}
 		return ret;
 	}
 })();
