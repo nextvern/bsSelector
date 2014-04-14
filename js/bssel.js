@@ -103,7 +103,7 @@ var finder = (function(){
 		return tokens;
 	},
 	compareEl = (function(){
-		var r0, setIdx, setLastIdx, setTypeIdx, setLastTypeIdx;
+		var r0, setIdx, setLastIdx, setTypeIdx, setLastTypeIdx, i, j;
 		r0 = /"|'/g, //"
 		setIdx = function setIdx(pEl){
 			var el, els, i, j, typeIdx;
@@ -133,7 +133,7 @@ var finder = (function(){
 			}
 			return 1;
 		},
-		setTypeIdx = function setIdx(pEl, tagName){
+		setTypeIdx = function setTypeIdx(pEl, tagName){
 			var el, els, i, j, typeIdx;
 			if( !pEl || pEl.tagName == 'HTML' ) return 0;
 			els = pEl.childNodes,
@@ -147,7 +147,7 @@ var finder = (function(){
 			}
 			return 1;
 		},
-		setLastTypeIdx = function setLastIdx(pEl, tagName){
+		setLastTypeIdx = function setLastTypeIdx(pEl, tagName){
 			var el, els, i, typeIdx;
 			if( !pEl || pEl.tagName == 'HTML' ) return 0;
 			els = pEl.childNodes,
@@ -226,16 +226,39 @@ var finder = (function(){
 					if(el.tagName == 'HTML') return 1;
 					break;
 				case'first-of-type':
-					elTagName = el.tagName;
-					if( !el.bsRtimeT || el.bsRtimeT != elTagName + finder.bsRtime ) setTypeIdx(el.parentNode, elTagName );
-					
-					return el.bsIdxT == 1;
+					elTagName = el.tagName,
+					pEl = el.parentNode;
+					if( !pEl.bsRtimeFCT || pEl.bsRtimeFCT != elTagName + finder.bsRtime ){
+						pEl.bsRtimeFCT = elTagName + finder.bsRtime,
+						op = pEl && pEl.childNodes;
+						if( op && ( j = op.length ) ){
+							i = 0, pEl.bsFCTEl = null;
+							while( i < j ){
+								if( op[i].nodeType == 1 && op[i].tagName == elTagName ){
+									pEl.bsFCTEl = op[i]; break;
+								}
+								i++;
+							}
+						}
+					}
+					return pEl.bsFCTEl == el;
 					break;
 				case'last-of-type':
-					elTagName = el.tagName;
-					if( !el.bsRtimeLT || el.bsRtimeLT != elTagName + finder.bsRtime ) setLastTypeIdx(el.parentNode, elTagName );
-					
-					return el.bsIdxLT == 1;
+					elTagName = el.tagName,
+					pEl = el.parentNode;
+					if( !pEl.bsRtimeLCT || pEl.bsRtimeLCT != elTagName + finder.bsRtime ){
+						pEl.bsRtimeLCT = elTagName + finder.bsRtime,
+						op = pEl && pEl.childNodes;
+						if( op && ( i = op.length ) ){
+							pEl.bsLCTEl = null;
+							while( i-- ){
+								if( op[i].nodeType == 1 && op[i].tagName == elTagName ){
+									pEl.bsLCTEl = op[i]; break;
+								}
+							}
+						}
+					}
+					return pEl.bsLCTEl == el;
 					break;
 				case'nth-of-type':
 					if( val == 'n' ) return 1;
@@ -268,25 +291,57 @@ var finder = (function(){
 					return 0;
 					break;
 				case'only-child':
-					op = el.parentNode && el.parentNode.childNodes;
-					if( op && ( i = op.length ) ){
-						opIdx = 0;
-						while( i-- ){
-							if( op[i].nodeType == 1 && op[i].tagName != 'HTML' && ++opIdx && (val = op[i]) && opIdx > 1 ) return 0;
+					pEl = el.parentNode;
+					if( !pEl.bsRtimeOCH || pEl.bsRtimeOCH != finder.bsRtime || !pEl.bsChElLen){
+						pEl.bsRtimeOCH = finder.bsRtime,
+						op = pEl && pEl.childNodes;
+						if( op && ( i = op.length ) ){
+							opIdx = 0, val = null;
+							while( i-- ){
+								if( op[i].nodeType == 1 && opIdx++ ) val = op[i];
+								if( opIdx > 2 ) break;
+							}
+							if( opIdx == 1 ) pEl.bsChEl = val;
 						}
-						if( opIdx == 1 && el == val ) return 1;
+						pEl.bsChElLen = opIdx;
+					}
+					if( pEl.bsChElLen == 1 && pEl.bsChEl == el ){
+						return 1;
 					}
 					return 0;
 					break;
 				case'first-child':
-					if( !el.bsRtime || el.bsRtime != finder.bsRtime ) setIdx(el.parentNode);
-
-					return el.bsIdx == 1;
+					pEl = el.parentNode;
+					if( !pEl.bsRtimeFC || pEl.bsRtimeFC != finder.bsRtime ){
+						pEl.bsRtimeFC = finder.bsRtime,
+						op = pEl && pEl.childNodes;
+						if( op && ( j = op.length ) ){
+							i = 0, pEl.bsFCEl = null;
+							while( i < j ){
+								if( op[i].nodeType == 1 ){
+									pEl.bsFCEl = op[i]; break;
+								}
+								i++;
+							}
+						}
+					}
+					return pEl.bsFCEl == el;
 					break;
 				case'last-child':
-					if( !el.bsRtimeL || el.bsRtimeL != finder.bsRtime ) setLastIdx(el.parentNode);
-
-					return el.bsIdxL == 1;
+					pEl = el.parentNode;
+					if( !pEl.bsRtimeLC || pEl.bsRtimeLC != finder.bsRtime ){
+						pEl.bsRtimeLC = finder.bsRtime,
+						op = pEl && pEl.childNodes;
+						if( op && ( i = op.length ) ){
+							pEl.bsLCEl = null;
+							while( i-- ){
+								if( op[i].nodeType == 1 ){
+									pEl.bsLCEl = op[i]; break;
+								}
+							}
+						}
+					}
+					return pEl.bsLCEl == el;
 					break;
 				case'nth-child':
 					if( val == 'n' ) return 1;
@@ -441,37 +496,11 @@ var finder = (function(){
 			if( hit ) ret[ret.length] = els[i];
 		}
 		return ret;
-	}
+	};
 })();
 	finder.isQS = isQS;
 	return finder;
 })();
 
 
-
-
-
-
-
-
-
-
-
-
-
-//
-//function querySelectorAll(element, selector) {
-//    if(element.querySelectorAll) { // Morden Browser
-//        return element.querySelectorAll(selector);
-//    }
-//    else { // low versioning IE only
-//        var a=element.all, c=[], selector = selector.replace(/\[for\b/gi, '[htmlFor').split(','), i, j, s=document.createStyleSheet();
-//        for (i=selector.length; i--;) {
-//            s.addRule(selector[i], 'k:v');
-//            for (j=a.length; j--;) a[j].currentStyle.k && c.push(a[j]);
-//            s.removeRule(0);
-//        }
-//        return c;
-//    }
-//}
 
