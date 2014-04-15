@@ -26,44 +26,15 @@ bs.trim = (function(){
 	};
 	return f;
 })();
+
+// bssel
 var bssel = (function(){
 'use strict';
 var isQS, isClsName;
 isQS = ( typeof document.querySelectorAll == 'function' ); // <= IE8
 isClsName = ( typeof document.getElementsByClassName == 'function' );
-var echo = function(target, filter, parentName) {
-	var k;
-	if (parentName && (typeof parentName != "string" || typeof parentName == "string" && (parentName.split(".").length + parentName.split("]").length) > 3)) return;
-	if (!filter) filter = "";
-	if (target === null || target === undefined) {
-		console.log(((parentName) ? parentName + "." : "") + target);
-		return;
-	}
-	if (typeof target != "object") {
-		if (typeof target == filter || filter === "")
-			console.log(((parentName) ? parentName + "." : "") + target + "["+ typeof target +"]");
-		return;
-	}
-	(target instanceof Array) ? console.log(((parentName) ? parentName + ":" : "") + "[Array["+ target.length + "]]") : console.log(((parentName) ? parentName + ":" : "") + "[Object]");
-	for (k in target) {
-		if (target instanceof Array) {
-			if (typeof target[k] == "object")
-				echo(target[k], filter, ((parentName) ? parentName + "[" : "[") + k + ((parentName) ? "]" : "]"));
-			else if (typeof target[k] == filter || filter === "")
-				console.log(((parentName) ? parentName + "[" : "[") + k + ((parentName) ? "]" : "]") + ":" + target[k] + " ("+ typeof target[k] +")");
-		} else {
-			if (typeof target[k] == "object")
-				echo(target[k], filter, ((parentName) ? parentName + "." : "")+k);
-			else if (typeof target[k] == filter || filter === "")
-				console.log(((parentName) ? parentName + "." : "") + k + ":" + target[k] + " ("+ typeof target[k] +")");
-		}
-	}
-};
-
-// 본체
 var finder = (function(){
 	var parseQuery, compareEl, rTag, rAlpha, rClsId, hasParent, nParent, oSel, ret;
-
 	oSel = [],
 	ret = [],
 	nParent = ' >',

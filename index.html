@@ -128,22 +128,20 @@ function printer($s){
 	document.getElementById('result').innerHTML = ret.length;
 	if( bssel.isQS ){
 		nRet = document.querySelectorAll($s), console.log( '## native:', nRet );
-		if( ret.length != nRet.length ){
-			document.getElementById('result').innerHTML = 'fail';
-		}else{
-			document.getElementById('result').innerHTML = 'success';
-		}
-		for(var i=0; i<ret.length; i++){
-			if( ret[i] != nRet[i] ){
-				document.getElementById('result').style.backgroundColor = 'red';
-				ret[i].className = ret[i].className ? ret[i].className + ' selected': 'selected';
-			}
-		}
 	}else{
-		for (var i=0; i < ret.length; i++) {
-			console.log( ret[i].outerHTML );
-		};
-		console.log()
+		nRet = Sizzle($s), console.log( '## Sizzle:', nRet );
+	}
+	if( ret.length != nRet.length ){
+		document.getElementById('result').innerHTML = 'fail';
+	}else{
+		document.getElementById('result').innerHTML = 'success';
+	}
+	for(var i=0; i<ret.length; i++){
+		if( ret[i] != nRet[i] ){
+			document.getElementById('result').style.backgroundColor = 'red';
+			ret[i].className = ret[i].className ? ret[i].className + ' selected': 'selected';
+			break;
+		}
 	}
 	console.log('## bssel length:', ret.length);
 }
