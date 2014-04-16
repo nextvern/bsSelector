@@ -12,13 +12,11 @@
 		border:2px solid red;
 	}
 </style>
-
-<script src="js/sizzle.js"></script>
 </head>
 <body>
 <h1 id='result'>aa</h1>>
 <input onkeyup='if(event.keyCode == 13)printer(this.value);'id='selector' style='padding:5px;border:2px solid green;font-size:20px;'>
-<button onclick='bssel(document.getElementById("selector").value);'>go</button>
+<button onclick='printer(document.getElementById("selector").value);'>go</button>
 <article>
 	<div>ar-div1
 		<a>ar-div1-a</a>
@@ -64,7 +62,7 @@
 </section>
 <form>
 <input type='text' name='aaa' alt='' readonly disabled>
-<input type='text' name='aaa1' alt='' readonly disabled>
+<input type='text' name='aaa1' alt='' readonly>
 <input type='checkbox' name='bbb' alt='fff' readonly>
 <input type='checkbox' name='bbb1' alt='fff' checked='false'>
 <input type='checkbox' name='bbb2' alt='fff' checked disabled>
@@ -86,6 +84,8 @@
 </textarea>
 
 </form>
+<script src="http://projectbs.github.io/bsDetect/js/detect.js"></script>
+<script src="js/sizzle.js"></script>
 <script src="./js/bssel.js"></script>
 <script>
 var elAll = bssel('*'), ret, nRet;
@@ -133,6 +133,8 @@ function printer($s){
 	}
 	if( ret.length != nRet.length ){
 		document.getElementById('result').innerHTML = 'fail';
+		console.log('## bssel length:', ret.length);
+		return;
 	}else{
 		document.getElementById('result').innerHTML = 'success';
 	}

@@ -4,10 +4,6 @@
 	<meta charset="utf-8">
 	<title>Sizzle Performance Suite HTML</title>
 	<link rel="shortcut icon" href="../images/favicon.ico">
-	<script src="../js/bssel.js"></script>
-	<script src="../js/sizzle.js"></script>
-	<script src="jquery-1.7.2.js"></script>
-	<script src="mootools-slick.js"></script>
 </head>
 <body>
 	<!-- HTML taken from http://www.w3.org/TR/selectors/ -->
@@ -3281,8 +3277,13 @@
 		<!---->
 	</dl>
 	<!--end-informative-->
+<script src="http://projectbs.github.io/bsDetect/js/detect.js"></script>
+<script src="../js/bssel.js"></script>
+<script src="../js/sizzle.js"></script>
+<script src="jquery-1.7.2.js"></script>
+<script src="mootools-slick.js"></script>
 <script>
-document.querySelector = document.querySelectorAll = null;
+//document.querySelector = document.querySelectorAll = null;
 function ss(){
 	var start = +new Date(), count = 0;
 	while( +new Date() - start < 1000 ){
