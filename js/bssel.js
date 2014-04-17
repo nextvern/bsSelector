@@ -18,17 +18,18 @@ var detect = DETECT(window, document);
 // bssel
 var bssel = (function(){
 'use strict';
-var isQS, isClsName;
-isQS = ( typeof document.querySelectorAll == 'function' ); // <= IE8
+var isQSA, isClsName;
+isQSA = ( typeof document.querySelectorAll == 'function' ); // <= IE8
 isClsName = ( typeof document.getElementsByClassName == 'function' );
 var finder = (function(){
-	var utrim, parseQuery, compareEl, rTag, rAlpha, rClsTagId, hasParent, nParent, nQS,
+	var utrim, parseQuery, compareEl, rTag, rAlpha, rClsTagId, hasParent, nParent, nQSA, hasQSAErr, nQSAErr,
 		oSel, ret, isIE, ieVer;
 	oSel = [],
 	ret = [],
 	isIE = detect.browser == 'ie',
 	ieVer = detect.browserVer,
-	nQS = ' +~:[',
+	nQSA = ' +~:[',
+	nQSAErr = '!',
 	nParent = ' >',
 	rTag = /^[a-z]+[0-9]*$/i,
 	rAlpha = /[a-z]/i,
@@ -49,36 +50,37 @@ var finder = (function(){
 		return f;
 	})(),
 	parseQuery = function(s){
-		var tokens, token, key, i, t0, t1, f0;
-		tokens = [],
-		token = '',
+		var tks, tk, k, i, t0, t1, f;
+		tks = [],
+		tk = '',
 		i = s.length;
 		while( i-- ){
-			key = s.charAt(i);
-			if( nParent.indexOf(key) > -1 ) hasParent = 1;
-			if( key == '[' || key == '(' ) f0 = 0;
-			else if( key == ']' || key == ')' ){ f0 = 1;continue; }
+			k = s.charAt(i);
+			if( nParent.indexOf(k) > -1 ) hasParent = 1;
+			if( f && nQSAErr.indexOf(k) > -1 ) hasQSAErr = 1;
+			if( k == '[' || k == '(' ) f = 0;
+			else if( k == ']' || k == ')' ){ f = 1;continue; }
 
-			if( key != '*' && key != ' ' && key != ']' && key != '>' && key != '+' && key != '~' && key != '^' && key != '$' && key != '*' ){
-				token = key + token;
+			if( k != '*' && k != ' ' && k != ']' && k != '>' && k != '+' && k != '~' && k != '^' && k != '$' && k != '*' ){
+				tk = k + tk;
 			}
-			if( ( key == '*' || key == ' ' || key == ']' || key == '>' || key == '+' || key == '~' || key == '^' || key == '$' || key == '*' ) && f0 ) token = key + token;
+			if( ( k == '*' || k == ' ' || k == ']' || k == '>' || k == '+' || k == '~' || k == '^' || k == '$' || k == '*' ) && f ) tk = k + tk;
 			else{
-				if( key == ' ' ){
-					if( tokens[tokens.length-1] == ' ' ) continue;
-					if( token ) tokens.push(token), token = '';
-					if( ( t0 = tokens[tokens.length-1] ) != '>' && t0 != '+' && t0 != '~' ) tokens.push(key);
-				}else if( key == '*' || key == '>' || key == '+' || key == '~' ){
-					if( utrim(token) ) tokens.push(token), token = '';
-					if( tokens[tokens.length-1] == ' ' ) tokens.pop();
-					tokens.push(key);
-				}else if( key == '#' || key == '.' || key == ':' || key == '[' || !i ){
-					if( token ) tokens.push(token), token = '';
-				}else if( s.charAt(i-1) == ' ' ) tokens.push(token), token = '';
+				if( k == ' ' ){
+					if( tks[tks.length-1] == ' ' ) continue;
+					if( tk ) tks.push(tk), tk = '';
+					if( ( t0 = tks[tks.length-1] ) != '>' && t0 != '+' && t0 != '~' ) tks.push(k);
+				}else if( k == '*' || k == '>' || k == '+' || k == '~' ){
+					if( utrim(tk) ) tks.push(tk), tk = '';
+					if( tks[tks.length-1] == ' ' ) tks.pop();
+					tks.push(k);
+				}else if( k == '#' || k == '.' || k == ':' || k == '[' || !i ){
+					if( tk && !f ) tks.push(tk), tk = '';
+				}else if( s.charAt(i-1) == ' ' ) tks.push(tk), tk = '';
 			}
 		}
-		//console.log(tokens);
-		return tokens;
+		//console.log(tks);
+		return tks;
 	},
 	compareEl = (function(){
 		var r0, setIdx, setLastIdx, setTypeIdx, setLastTypeIdx, i, j;
@@ -139,7 +141,7 @@ var finder = (function(){
 			}
 			return 1;
 		};
-		return function(el, token){
+		return function compareEl(el, token){
 			var key, val, opIdx, op, i, j, clsNm, elTagName, elIdx, pEl, t0;
 			if( ( key = token.charAt(0) ) == '#' ){
 				key = token.substr(1);
@@ -152,7 +154,6 @@ var finder = (function(){
 				return 0;
 			}else if( key == '[' ){
 				// TODO:IE7 에서 A, SCRIPT, UL, LI 등의 요소에 기본 type 속성이 생성되어있는 문제 처리(아마 outerHTML으로 해결될지도?)
-				// '<div abc=\'test="addbc"\' test="abc" test="abc1"><div test="def">'.match(/test=("[^<>"]*"|'[^<>']*'|)[^>]+>/i)
 				key = token.substr(1);
 				opIdx = key.indexOf('=');
 				op = opIdx > -1 ? key.charAt(opIdx-1) : null;
@@ -189,7 +190,6 @@ var finder = (function(){
 					}
 				}
 			}else if( key == ':' ){
-				// TODO:pseudo 처리
 				key = token.substr(1);
 				val = ( opIdx = key.indexOf('(') ) > -1 ? isNaN( val = key.substr( opIdx+1 ) ) ? utrim(val) : Number( val ) : null;
 				if( val ) key = key.substring( 0, opIdx );
@@ -375,7 +375,7 @@ var finder = (function(){
 	})();
 	return function finder( $s, $doc ){
 		var doc, nRet, el, els, sels, t0, i, j, k, m, n,
-			tags, key, hit, token, tokens, l2r, hasQS;
+			tags, key, hit, token, tokens, hasQS;
 		finder.bsRtime = +new Date(),
 		doc = $doc || document,
 		finder.lastQuery = $s;
@@ -387,21 +387,27 @@ var finder = (function(){
 			else if( rTag.test( $s ) )
 				return doc.getElementsByTagName( $s );
 		}
+		if( isQSA && $s.indexOf(',') > -1 && $s.indexOf('!') < 0 ) return doc.querySelectorAll( $s );
 		oSel.length = 0,
 		hasQS = 0,
 		sels = utrim( $s.split(',') );
 		for( i = sels.length; i--; ){
 			t0 = parseQuery( sels[i] );
 			for( j = t0.length; j--; ){
-				if( rTag.test( t0[j] ) ) t0[j] = t0[j].toUpperCase();
-				if( isQS && !hasQS && !nQS.indexOf( t0[j].charAt(0) ) > -1 ) hasQS = 1;
+				if( rTag.test( t0[j] ) )
+					t0[j] = t0[j].toUpperCase();
+				else if( t0[j].charAt(0) == ':' ){
+					t0[j] = t0[j].toLowerCase();
+					if( ( t0[j] == ':nth-child(n' || t0[j] == ':nth-last-child(n' ) && t0.length != 1 ){
+						t0.splice(j,1);continue;
+					}
+				}
+				if( isQSA && !hasQSAErr && !hasQS && !nQSA.indexOf( t0[j].charAt(0) ) > -1 ) hasQS = 1;
 			}
 			oSel.push( t0 );
 		}
-		if( hasQS ) return doc.querySelectorAll( $s );
-		//console.log("### oSel", oSel);
-		// TODO:native 처리
-		if( oSel.length == 1 ){ // ,가 없을 경우
+		//console.log("### oSel", oSel);return;
+		if( oSel.length == 1 && oSel[0].length ){
 			if( ( key = oSel[0][0].charAt(0) ) == '#' ){
 				els = [doc.getElementById( oSel[0][0].substr(1) )],
 				oSel[0].shift();
@@ -409,8 +415,10 @@ var finder = (function(){
 			else if( key == '.' && isClsName ){
 				els = doc.getElementsByClassName( oSel[0][0].substr(1) ),
 				oSel[0].shift();
+				if( hasQS && els.length > 100 ) return doc.querySelectorAll( $s );
 			}
 			else if( key == '[' || key == ':' ){
+				if( hasQS ) return doc.querySelectorAll( $s );
 				if( !hasParent ){
 					els = oSel[0][oSel[0].length-1];
 					if( ( key = els.charAt(0) ) == '#' )
@@ -428,52 +436,46 @@ var finder = (function(){
 				else
 					els = doc.getElementsByTagName('*');
 			}
-			else if( rTag.test( els = oSel[0][0] ) )
+			else if( rTag.test( els = oSel[0][0] ) ){
 				els = doc.getElementsByTagName( els ),
 				oSel[0].shift();
+				if( hasQS && els.length > 100 ) return doc.querySelectorAll( $s );
+			}
 			else els = doc.getElementsByTagName('*');
 		}else{
 			els = doc.getElementsByTagName('*');
 		}
-
+		if( !oSel[0].length ) return els;
 		ret.length = 0;
 		for( i = 0, j = els.length; i < j; i++ ){
-			//hit = 0;
 			for( k = oSel.length; k--; ){
 				tokens = oSel[k];
 				el = els[i];
-				//if( !l2r ){ // 후방탐색
-					for( m = 0, n = tokens.length; m < n; m++ ){
-						//console.log('abc')
-						token = tokens[m];
-						hit = 0;
-						if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
-							m++;
-							while( el = el.parentNode ){
-								if( hit = compareEl( el, tokens[m] ) ) break;
-							}
-						}else if( key == '>' ){ // immediate parent
-							hit = compareEl( el = el.parentNode, tokens[++m] );
-						}else if( key == '+' ){ // has immediate nextsibling
-							while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
-							hit = el && compareEl( el, tokens[++m] );
-						}else if( key == '~' ){ // has any nextsibling
-							m++;
-							while( el = el.previousSibling ){
-								if( el.nodeType == 1 && compareEl( el, tokens[m] ) ){
-									hit = 1; break;
-								}
-							}
-						}else{
-							hit = compareEl( el, token );
+				for( m = 0, n = tokens.length; m < n; m++ ){
+					token = tokens[m];
+					hit = 0;
+					if( ( key = token.charAt(0) ) == ' ' ){ // loop parent
+						m++;
+						while( el = el.parentNode ){
+							if( hit = compareEl( el, tokens[m] ) ) break;
 						}
-						if( !hit ) break; // 여긴 AND 연산
-						//console.log(key);
+					}else if( key == '>' ){ // immediate parent
+						hit = compareEl( el = el.parentNode, tokens[++m] );
+					}else if( key == '+' ){ // has immediate nextsibling
+						while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
+						hit = el && compareEl( el, tokens[++m] );
+					}else if( key == '~' ){ // has any nextsibling
+						m++;
+						while( el = el.previousSibling ){
+							if( el.nodeType == 1 && compareEl( el, tokens[m] ) ){
+								hit = 1; break;
+							}
+						}
+					}else{
+						hit = compareEl( el, token );
 					}
-				/*}else{ // 전방탐색
-					for( m = tokens.length; m--; ){
-					}
-				}*/
+					if( !hit ) break; // 여긴 AND 연산
+				}
 				if( hit ) break; // 여긴 OR 연산
 			}
 			if( hit ) ret[ret.length] = els[i];
@@ -481,7 +483,7 @@ var finder = (function(){
 		return ret;
 	};
 })();
-	finder.isQS = isQS;
+	finder.isQSA = isQSA;
 	return finder;
 })();
 

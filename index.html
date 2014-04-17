@@ -126,7 +126,7 @@ function printer($s){
 	document.getElementById('selector').value = $s;
 	document.getElementById('result').style.backgroundColor = 'white';
 	document.getElementById('result').innerHTML = ret.length;
-	if( bssel.isQS ){
+	if( bssel.isQSA ){
 		nRet = document.querySelectorAll($s), console.log( '## native:', nRet );
 	}else{
 		nRet = Sizzle($s), console.log( '## Sizzle:', nRet );

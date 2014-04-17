@@ -3285,9 +3285,12 @@
 <script>
 //document.querySelector = document.querySelectorAll = null;
 function ss(){
-	var start = +new Date(), count = 0;
+	var start = +new Date(), count = 0, i, els;
 	while( +new Date() - start < 1000 ){
-		btree(document.body);
+		els = document.getElementsByTagName('*');
+		for(i=els.length; i--;){
+			els[i].bsCache = 1;
+		}
 		count++;
 	}
 	console.log(count);
