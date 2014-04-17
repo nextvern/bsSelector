@@ -86,9 +86,9 @@
 </form>
 <script src="http://projectbs.github.io/bsDetect/js/detect.js"></script>
 <script src="js/sizzle.js"></script>
-<script src="./js/bssel.js"></script>
+<script src="./js/bsSelector.js"></script>
 <script>
-var elAll = bssel('*'), ret, nRet;
+var elAll = bsSelector('*'), ret, nRet;
 for(var i=0, j=elAll.length; i<j; i++){
 	elAll[i].className = elAll[i].className.replace( 'selected', '' );
 }
@@ -121,12 +121,12 @@ printer('input[type]');
 //printer(':root');
 function printer($s){
 	var ret, nRet;
-	ret = bssel($s);
+	ret = bsSelector($s);
 	console.log('## bssel:',ret);
 	document.getElementById('selector').value = $s;
 	document.getElementById('result').style.backgroundColor = 'white';
 	document.getElementById('result').innerHTML = ret.length;
-	if( bssel.isQSA ){
+	if( bsSelector.isQSA ){
 		nRet = document.querySelectorAll($s), console.log( '## native:', nRet );
 	}else{
 		nRet = Sizzle($s), console.log( '## Sizzle:', nRet );

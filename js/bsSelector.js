@@ -15,8 +15,8 @@
 
 var detect = DETECT(window, document);
 
-// bssel
-var bssel = (function(){
+// bsSelector
+var bsSelector = (function(){
 'use strict';
 var isQSA, isClsName;
 isQSA = ( typeof document.querySelectorAll == 'function' ); // <= IE8
