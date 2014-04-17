@@ -12,12 +12,11 @@
 		border:2px solid red;
 	}
 </style>
-<script src="http://projectbs.github.io/bsJS/bs/bsjs.js"></script>
 </head>
 <body>
 <h1 id='result'>aa</h1>>
-<input onkeyup='if(event.keyCode == 13)bssel(this.value);'id='selector' style='padding:5px;border:2px solid green;font-size:20px;'>
-<button onclick='bssel(document.getElementById("selector").value);'>go</button>
+<input onkeyup='if(event.keyCode == 13)printer(this.value);'id='selector' style='padding:5px;border:2px solid green;font-size:20px;'>
+<button onclick='printer(document.getElementById("selector").value);'>go</button>
 <article>
 	<div>ar-div1
 		<a>ar-div1-a</a>
@@ -63,7 +62,7 @@
 </section>
 <form>
 <input type='text' name='aaa' alt='' readonly disabled>
-<input type='text' name='aaa1' alt='' readonly disabled>
+<input type='text' name='aaa1' alt='' readonly>
 <input type='checkbox' name='bbb' alt='fff' readonly>
 <input type='checkbox' name='bbb1' alt='fff' checked='false'>
 <input type='checkbox' name='bbb2' alt='fff' checked disabled>
@@ -85,35 +84,71 @@
 </textarea>
 
 </form>
-<script src="./js/selector.js"></script>
+<script src="http://projectbs.github.io/bsDetect/js/detect.js"></script>
+<script src="js/sizzle.js"></script>
+<script src="./js/bsSelector.js"></script>
 <script>
-//bssel('li[disabled], input[type], :checked[type][type]');
-bssel('input[type]');
-//bssel('.testid>[data-id]');
-//bssel('.testid>[data-id], .testid [data-id]');
-//bssel('[data-id] form[data-id]:checked');
-//bssel('li   [data-id="abc   def"]');
-//bssel('.testid.testid2');
-//bssel('#testid:first-child');
-//bssel('article+section');
-//bssel('li[data-id~=\'def\']');
-//bssel("p  ~  div   ~   p  [data-id='abc  def']  :first-child  [data-id='abc  def']  ");
-//bssel('article ~ form');
-//bssel('li[data-id$=\'f\']');
-//bssel('input:nth-of-type(1)');
-//bssel('input:first-of-type');
-//bssel('input:last-of-type');
-//bssel('input:nth-last-of-type(1)');
-//bssel('input:only-of-type');
-//bssel('li:only-child');
-//bssel('li:first-child');
-//bssel('li:last-child');
-//bssel('li:nth-child(odd)');
-//bssel('li:nth-last-child(even)');
-//bssel('input:empty');
-//bssel(':checked');
-//bssel(':enabled');
-//bssel(':root');
+var elAll = bsSelector('*'), ret, nRet;
+for(var i=0, j=elAll.length; i<j; i++){
+	elAll[i].className = elAll[i].className.replace( 'selected', '' );
+}
+//printer('li[disabled], input[type], :checked[type][type]');
+printer('input[type]');
+//printer('.testid>[data-id]');
+//printer('.testid>[data-id], .testid [data-id]');
+//printer('[data-id] form[data-id]:checked');
+//printer('li   [data-id="abc   def"]');
+//printer('.testid.testid2');
+//printer('#testid:first-child');
+//printer('article+section');
+//printer('li[data-id~=\'def\']');
+//printer("p  ~  div   ~   p  [data-id='abc  def']  :first-child  [data-id='abc  def']  ");
+//printer('article ~ form');
+//printer('li[data-id$=\'f\']');
+//printer('input:nth-of-type(1)');
+//printer('input:first-of-type');
+//printer('input:last-of-type');
+//printer('input:nth-last-of-type(1)');
+//printer('input:only-of-type');
+//printer('li:only-child');
+//printer('li:first-child');
+//printer('li:last-child');
+//printer('li:nth-child(odd)');
+//printer('li:nth-last-child(even)');
+//printer('input:empty');
+//printer(':checked');
+//printer(':enabled');
+//printer(':root');
+function printer($s){
+	var ret, nRet;
+	ret = bsSelector($s);
+	console.log('## bssel:',ret);
+	document.getElementById('selector').value = $s;
+	document.getElementById('result').style.backgroundColor = 'white';
+	document.getElementById('result').innerHTML = ret.length;
+	if( bsSelector.isQSA ){
+		nRet = document.querySelectorAll($s), console.log( '## native:', nRet );
+	}else{
+		nRet = Sizzle($s), console.log( '## Sizzle:', nRet );
+	}
+	if( ret.length != nRet.length ){
+		document.getElementById('result').innerHTML = 'fail';
+		console.log('## bssel length:', ret.length);
+		return;
+	}else{
+		document.getElementById('result').innerHTML = 'success';
+	}
+	for(var i=0; i<ret.length; i++){
+		if( ret[i] != nRet[i] ){
+			document.getElementById('result').style.backgroundColor = 'red';
+			ret[i].className = ret[i].className ? ret[i].className + ' selected': 'selected';
+			break;
+		}
+	}
+	console.log('## bssel length:', ret.length);
+}
+
+
 </script>
 
 </body>
