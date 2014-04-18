@@ -212,30 +212,16 @@ var bsSelector = (function( doc, trim ){
 					return val == 'even' || val == '2n' ? elIdx % 2 == 0 :
 						val == 'odd' || val == '2n+1' ? elIdx % 2 == 1 :
 						elIdx == val;
-				case'empty':
-					if( el.nodeType == 1 && !el.nodeValue && !el.childNodes.length ) return 1;
-					return 0;
+				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
 				case'checked':
-					elTagName = el.tagName;
-					if(
-						( elTagName == 'INPUT' && (el.getAttribute('type') == 'radio' || el.getAttribute('type') == 'checkbox' ) && el.checked == true ) ||
-						( elTagName == 'OPTION' && el.selected == true )
-					) return 1;
-					return 0;
+					return elTagName = el.tagName, ( elTagName == 'INPUT' && (el.getAttribute('type') == 'radio' || el.getAttribute('type') == 'checkbox' ) && el.checked == true ) ||
+						( elTagName == 'OPTION' && el.selected == true );
 				case'enabled':
-					elTagName = el.tagName;
-					if(
-						(elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
-						el.getAttribute('disabled') == null
-					) return 1;
-					return 0;
+					return elTagName = el.tagName, (elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
+						el.getAttribute('disabled') == null;
 				case'disabled':
-					elTagName = el.tagName;
-					if(
-						(elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
+					return elTagName = el.tagName, (elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
 						el.getAttribute('disabled') != null
-					) return 1;
-					return 0;
 				}
 			}else return token == el.tagName || token == '*';// TAG 처리
 			return 0;
