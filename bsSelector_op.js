@@ -1,31 +1,13 @@
-/* bsJS - OpenSource JavaScript library version 0.3.0 / 2013.12.25 by projectBS committee
- * Copyright 2013.10 projectBS committee.
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * GitHub-http://goo.gl/FLI7te Facebook group-http://goo.gl/8s5qmQ
- */
-/*
-	bsSelector 농부 백승현(https://www.facebook.com/pekuid)
-	bsDetect가 있어야 합니다.
-	https://github.com/projectBS/bsDetect/blob/gh-pages/js/detect.js
-	http://projectbs.github.io/bsDetect/js/detect.js
-	CSS3 & 4 참고자료
-	http://css4-selectors.com/browser-selector-test/
-	http://kimblim.dk/css-tests/selectors/
+/* bsSelector v0.1
+ * Copyright (c) 2013 by ProjectBS Committe and contributors. 
+ * http://www.bsplugin.com All rights reserved.
+ * Licensed under the BSD license. See http://opensource.org/licenses/BSD-3-Clause
+ * CSS3 & 4 참고자료
+ * http://css4-selectors.com/browser-selector-test/
+ * http://kimblim.dk/css-tests/selectors/
 */
-
-var detect = DETECT(window, document);
-var domData = (function(){
-	var id = 1, data = {};
-	return function( el, k, v ){
-		var t0;
-		if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
-		return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
-	};
-})()
-
-// bsSelector
-var bsSelector = (function( doc, trim ){
-'use strict';
+var bsSelector = function( doc, trim, detect, domData ){
+	'use strict';
 	var isQSA = doc['querySelectorAll'] ? 1 : 0, isClsName = doc['getElementsByClassName'] ? 1 : 0,
 		isIE = detect.browser == 'ie' ? 1 : 0, ieVer = detect.browserVer,
 		rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
@@ -46,19 +28,17 @@ var bsSelector = (function( doc, trim ){
 				if( ( t0 = mBracket[k] ) !== undefined && ( b = t0 ) ) continue;
 				if( !( t0 = mEx[k] ) ) tk = k + tk;
 				if( t0 && b ) tk = k + tk;
-				else{
-					if( ( t0 = mT0[k] ) == 1 ){
-						if( ( t1 = tks[tks.length - 1] ) == ' ' ) continue;
-						if( tk ) tks[tks.length] = t1 = tk, tk = '';
-						if( !mT1[t1] ) tks[tks.length] = k;
-					}else if( t0 == 2 ){
-						if( tk.replace( trim, '' ) ) tks[tks.length] = tk, tk = '';
-						if( tks[tks.length - 1] == ' ' ) tks.pop();
-						tks[tks.length] = k;
-					}else if( t0 == 3 || !i ){
-						if( tk && !b ) tks[tks.length] = tk, tk = '';
-					}else if( s.charAt( i - 1 ) == ' ' ) tks[tks.length] = tk, tk = '';
-				}
+				else if( ( t0 = mT0[k] ) == 1 ){
+					if( ( t1 = tks[tks.length - 1] ) == ' ' ) continue;
+					if( tk ) tks[tks.length] = t1 = tk, tk = '';
+					if( !mT1[t1] ) tks[tks.length] = k;
+				}else if( t0 == 2 ){
+					if( tk.replace( trim, '' ) ) tks[tks.length] = tk, tk = '';
+					if( tks[tks.length - 1] == ' ' ) tks.pop();
+					tks[tks.length] = k;
+				}else if( t0 == 3 || !i ){
+					if( tk && !b ) tks[tks.length] = tk, tk = '';
+				}else if( s.charAt( i - 1 ) == ' ' ) tks[tks.length] = tk, tk = '';
 			}
 			return tks;
 		};
@@ -82,13 +62,8 @@ var bsSelector = (function( doc, trim ){
 				if( !( clsNm = el.className ) ) return 0;
 				return key = token.substr(1), clsNm.indexOf(' ') > -1 ? key == clsNm : clsNm.split(' ').indexOf(key) > -1;
 			}else if( key == '[' ){
-				// TODO:IE7 에서 A, SCRIPT, UL, LI 등의 요소에 기본 type 속성이 생성되어있는 문제 처리(아마 outerHTML으로 해결될지도?)
 				key = token.substr(1), opIdx = key.indexOf('=');
 				if( opIdx < 0 ) return el.getAttribute(key) !== null;
-					/*if( key == 'type' && isIE && ieVer < 9 ){
-						if( !el.tagName == 'INPUT' && !el.outerHTML.match(/type=("[^<>"]*"|'[^<>']*'|)[^>]+>/i) ) return 0; //"
-						else console.log( el.outerHTML );
-					}*/
 				else if( t0 = el.getAttribute(key) ) return op = opIdx > -1 ? key.charAt( opIdx - 1 ) : null,
 					val = key.split('='),
 					key = opIdx > -1 ? mT0[op] ? val[0].substring( 0, opIdx - 1 ) : val[0] : key,
@@ -100,10 +75,6 @@ var bsSelector = (function( doc, trim ){
 					op == '*' ? t0.indexOf(val) > -1 :// substring with
 					op == '!' ? t0 !== val :
 					t0 === val;
-					/*if( key == 'type' && isIE && ieVer < 9 ){
-						if( !el.outerHTML.match(/type=("[^<>"]*"|'[^<>']*'|)[^>]+>/i) ) return 0; //"
-						else el.outerHTML;
-					}*/
 			}else if( key == ':' ){
 				key = token.substr(1),
 				val = ( opIdx = key.indexOf('(') ) > -1 ? isNaN( val = key.substr( opIdx + 1 ) ) ? val.replace( trim, '' ) : parseFloat(val) : null;
@@ -227,7 +198,7 @@ var bsSelector = (function( doc, trim ){
 			return 0;
 		};
 	})();
-	finder = function( query, doc, ret ){
+	query = function( query, doc, ret ){
 		var el, els, sels, t0, i, j, k, m, n,
 			tags, key, hit, token, tokens, hasQS;
 		if( ret ) ret.length = 0;
@@ -337,6 +308,6 @@ var bsSelector = (function( doc, trim ){
 		}
 		return ret;
 	};
-	finder.isQSA = isQSA;
-	return finder;
-})( document, /^\s*|\s*$/g );
+	query.isQSA = isQSA;
+	return query;
+};
