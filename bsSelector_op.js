@@ -56,37 +56,43 @@ var bsSelector = function( doc, trim, detect, domData ){
 			return 1;
 		}, mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1};
 		return function( el, token ){
-			var key, val, opIdx, op, i, j, clsNm, elTagName, elIdx, pEl, t0, tname, ename;
-			if( ( key = token.charAt(0) ) == '#' ) return token.substr(1) == el.id;
-			else if( key == '.' ){
-				if( !( clsNm = el.className ) ) return 0;
-				return key = token.substr(1), clsNm.indexOf(' ') > -1 ? key == clsNm : clsNm.split(' ').indexOf(key) > -1;
-			}else if( key == '[' ){
-				key = token.substr(1), opIdx = key.indexOf('=');
-				if( opIdx < 0 ) return el.getAttribute(key) !== null;
-				else if( t0 = el.getAttribute(key) ) return op = opIdx > -1 ? key.charAt( opIdx - 1 ) : null,
-					val = key.split('='),
-					key = opIdx > -1 ? mT0[op] ? val[0].substring( 0, opIdx - 1 ) : val[0] : key,
-					val = opIdx > -1 ? val[1].replace( r0, '' ) : null,
-					op == '~' ? t0.split(' ').indexOf(val) > -1 :// list of space-separated values
-					op == '|' ? t0.split('-').indexOf(val) > -1 :// list of hyphen-separated values
-					op == '^' ? !t0.indexOf(val) :// begins exactly with
-					op == '$' ? t0.lastIndexOf(val) == ( t0.length - val.length ) :// end exactly with
-					op == '*' ? t0.indexOf(val) > -1 :// substring with
-					op == '!' ? t0 !== val :
-					t0 === val;
-			}else if( key == ':' ){
-				key = token.substr(1),
-				val = ( opIdx = key.indexOf('(') ) > -1 ? isNaN( val = key.substr( opIdx + 1 ) ) ? val.replace( trim, '' ) : parseFloat(val) : null;
-				if( val ) key = key.substring( 0, opIdx );
-				switch(key){
-				case'link':
-					if( el.tagName == 'A' && el.getAttribute('href') !== null ) return 1;
-					break;
-				case'active':case'visited':case'first-line':case'first-letter':case'hover':case'focus':break;
-				case'root':
-					if(el.tagName == 'HTML') return 1;
-					break;
+			var k, v, t0, t1, i, j, elTagName, elIdx, pEl, tname, ename;
+
+			switch( token.charAt(0) ){
+			case'#':return token.substr(1) == el.id;
+			case'.':return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
+			case'[':
+				t0 = el.getAttribute( k = token.substr(1) ), i = k.indexOf('=');
+				if( i == -1 ) return t0 === null ? 0 : 1;
+				if( t0 === null ) return 0;
+				t1 = k.charAt( i - 1 ), v = k.substr( i + 1 ), k = k.substring( 0, i - 1 );
+				switch( t1 ){
+				case'~':return t0.split(' ').indexOf(v) > -1;
+				case'|':return t0.split('-').indexOf(v) > -1;
+				case'^':return t0.indexOf(v) == 0;
+				case'$':return t0.lastIndexOf(v) == ( t0.length - v.length );
+				case'*':return t0.indexOf(v) > -1;
+				case'!':return t0 !== val;
+				default:return t0 === val;
+				}
+			case':':
+				k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
+				if( v ) k = k.substring( 0, i );
+				switch( k ){
+				case'active':case'visited':case'first-line':case'first-letter':case'hover':case'focus':return;
+				case'link':return el.tagName.toUpperCase() == 'A' && el.getAttribute('href') !== null;
+				case'root':return el.tagName.toUpperCase() == 'HTML';
+				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
+				case'checked':
+					return elTagName = el.tagName, ( elTagName == 'INPUT' && (el.getAttribute('type') == 'radio' || el.getAttribute('type') == 'checkbox' ) && el.checked == true ) ||
+						( elTagName == 'OPTION' && el.selected == true );
+				case'enabled':
+					return elTagName = el.tagName, (elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
+						el.getAttribute('disabled') == null;
+				case'disabled':
+					return elTagName = el.tagName, (elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
+						el.getAttribute('disabled') != null
+						
 				case'first-of-type':case'last-of-type':
 					elTagName = el.tagName, pEl = el.parentNode, t0 = domData(el), 
 					key.charAt(0) == 'f' ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' );
@@ -183,19 +189,10 @@ var bsSelector = function( doc, trim, detect, domData ){
 					return val == 'even' || val == '2n' ? elIdx % 2 == 0 :
 						val == 'odd' || val == '2n+1' ? elIdx % 2 == 1 :
 						elIdx == val;
-				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
-				case'checked':
-					return elTagName = el.tagName, ( elTagName == 'INPUT' && (el.getAttribute('type') == 'radio' || el.getAttribute('type') == 'checkbox' ) && el.checked == true ) ||
-						( elTagName == 'OPTION' && el.selected == true );
-				case'enabled':
-					return elTagName = el.tagName, (elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
-						el.getAttribute('disabled') == null;
-				case'disabled':
-					return elTagName = el.tagName, (elTagName == 'INPUT' || elTagName == 'BUTTON' || elTagName == 'SELECT' || elTagName == 'OPTION' || elTagName == 'TEXTAREA') &&
-						el.getAttribute('disabled') != null
+				default:return 0;
 				}
-			}else return token == el.tagName || token == '*';// TAG 처리
-			return 0;
+			default:return token == el.tagName || token == '*';
+			}
 		};
 	})();
 	query = function( query, doc, ret ){
