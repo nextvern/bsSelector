@@ -194,15 +194,15 @@ var bsSelector = function( doc, trim ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
 			else if( k == '.' ){
-				els =  className(t0.substr(1)), sels[0].shift();
+				els = className(t0.substr(1)), sels[0].shift();
 				//if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
 			}else if( k == '[' || k == ':' ){
-				if( hasQS ) return doc.querySelectorAll(query);
+				//if( hasQS ) return doc.querySelectorAll(query);
 				if( !hasParent ){
 					t0 = sels[0][sels[0].length - 1], k = t0.charAt(0);
 					if( k == '#' ) sels[0].pop(), els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById( t0.substr(1) );
-					else if( k == '.' ) sels[0].pop(), els = doc.getElementsByClassName( t0.substr(1) );
-					else if( rTag.test(t0) ) sels[0].pop(), els = tagName[t0] || ( tagName[t0] = doc.getElementsByTagName(els) );
+					else if( k == '.' ) sels[0].pop(), els = className( t0.substr(1) );
+					else if( rTag.test(t0) ) sels[0].pop(), els = tagName[t0] || ( tagName[t0] = doc.getElementsByTagName(t0) );
 				}
 			}else if( rTag.test(t0) ){
 				sels[0].shift(), els = tagName[t0] || ( tagName[t0] = doc.getElementsByTagName(t0) );
@@ -227,7 +227,7 @@ var bsSelector = function( doc, trim ){
 						hit = el && compare( el, tokens[++m] );
 					}else if( k == '~' ){
 						m++;
-						while( (el = el.previousSibling) != null ){
+						while( (el = el.previousSibling) ){
 							if( el.nodeType == 1 && compare( el, tokens[m] ) ){
 								hit = 1;
 								break;

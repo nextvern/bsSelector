@@ -3278,12 +3278,14 @@
 	</dl>
 	<!--end-informative-->
 <script src="http://projectbs.github.io/bsDetect/js/detect.js"></script>
+<script>
+document.querySelector = document.querySelectorAll = null;
+</script>
 <script src="../js/bsSelector_bench.js"></script>
 <script src="../js/sizzle.js"></script>
 <script src="jquery-1.7.2.js"></script>
 <script src="mootools-slick.js"></script>
 <script>
-//document.querySelector = document.querySelectorAll = null;
 function ss(){
 	var start = +new Date(), count = 0, i, els;
 	while( +new Date() - start < 1000 ){
