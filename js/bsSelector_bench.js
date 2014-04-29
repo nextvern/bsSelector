@@ -241,3 +241,4 @@ var bsSelector = function( doc, trim ){
 		return r;
 	};
 };
+var bsQuery = bsSelector( document, /^\s*|\s*$/g, {}, null );

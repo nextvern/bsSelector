@@ -5,28 +5,25 @@
  */
 /*
 	bsSelector 농부 백승현(https://www.facebook.com/pekuid)
-	bsDetect가 있어야 합니다.
-	https://github.com/projectBS/bsDetect/blob/gh-pages/js/detect.js
-	http://projectbs.github.io/bsDetect/js/detect.js
 	CSS3 & 4 참고자료
 	http://css4-selectors.com/browser-selector-test/
 	http://kimblim.dk/css-tests/selectors/
 */
 
-var detect = DETECT(window, document);
+//var detect = DETECT(window, document);
 
 // bsSelector
 var bsSelector = (function(){
 'use strict';
 var isQSA, isClsName;
-isQSA = ( typeof document.querySelectorAll == 'function' ); // <= IE8
+isQSA = document['querySelectorAll'] ? 1 : 0; // <= IE8
 isClsName = ( typeof document.getElementsByClassName == 'function' );
 var finder = (function(){
 	var utrim, parseQuery, compareEl, rTag, rAlpha, rClsTagId, hasParent, nParent, nQSA, hasQSAErr, nQSAErr,
 		oSel, isIE, ieVer;
 	oSel = [],
-	isIE = detect.browser == 'ie',
-	ieVer = detect.browserVer,
+	//isIE = detect.browser == 'ie',
+	//ieVer = detect.browserVer,
 	nQSA = ' +~:[',
 	nQSAErr = '!',
 	nParent = ' >',

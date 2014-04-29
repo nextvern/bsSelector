@@ -3277,49 +3277,81 @@
 		<!---->
 	</dl>
 	<!--end-informative-->
-	<script>
-		var suite, callback;
-		(function() {
-			var parts, engine,
-				params = {},
-				search = location.search.substring(1).split("&"),
-				i = 0,
-				len = search.length;
-
-			// Construct parameters object
-			for ( ; i < len; i++ ) {
-				parts = search[i].split("=");
-				params[ decodeURIComponent(parts[0]) ] = parts[1] ? decodeURIComponent( parts[1] ) : "true";
-			}
-
-			suite = params.suite;
-			callback = params.callback;
-
-			if ( (engine = params.engine) && engine !== "qsa" ) {
-
-				// Nullify QSA for testing
-				// unless otherwise specified
-				if ( params.qsa !== "true" ) {
-					document.querySelector = document.querySelectorAll = null;
-				}
-
-				if ( engine === "bsSelector" ) {
-					engine = "../../js/bsSelector_bench.js?ver=12";
-				} else {
-					engine = "../frameworks/" + engine + ".js";
-				}
-				//engine = "../frameworks/" + engine + ".js";
-
-				document.write("<scr" + "ipt src='" + engine + "'></scr" + "ipt>");
-			}
-		})();
-	</script>
-	<script>
-		// Using OR here to throw an error if one is present but not the other
-		// Does not throw an error if someone is just looking at this page
-		if ( suite != null || callback != null ) {
-			window.parent.iframeCallbacks[ suite ][ callback ].call( window, document );
+<script src="http://projectbs.github.io/bsDetect/js/detect.js"></script>
+<script src="../js/bsSelector_bench.js"></script>
+<script src="../js/sizzle.js"></script>
+<script src="jquery-1.7.2.js"></script>
+<script src="mootools-slick.js"></script>
+<script>
+//document.querySelector = document.querySelectorAll = null;
+function ss(){
+	var start = +new Date(), count = 0, i, els;
+	while( +new Date() - start < 1000 ){
+		els = document.getElementsByTagName('*');
+		for(i=els.length; i--;){
+			els[i].bsCache = 1;
 		}
-	</script>
+		count++;
+	}
+	console.log(count);
+}
+function qt($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		document.querySelectorAll($s), count++;
+	console.log(count);
+}
+function st($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		Sizzle($s), count++;
+	console.log(count);
+}
+function mt($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		Slick.search(document, $s), count++;
+	console.log(count);
+}
+function bst($s){
+	var start = +new Date(), count = 0;
+	while( +new Date() - start < 1000 )
+		//bst2(), count++;
+		bsSelector($s), count++;
+	console.log(count);
+}
+function bst2(){
+	var els, els2, i,j,k;
+	els = document.getElementsByTagName('p');
+	els2 = document.getElementsByTagName('p');
+	for(i=els.length;i--;){
+		for(j=els2.length; j--;){
+			els[i] == els2[j];
+		}
+	}
+}
+function btree($root){
+	var el,
+		eln, elp, lastEl, i, count;
+		count = 1;
+		eln = $root.childNodes;
+	for(i=eln.length; i--;){
+		el = eln[i];
+		if(el.nodeType==1)
+			//console.log(el.tagName),
+			el.bsnum = count++;
+		if(el.childNodes && el.childNodes.length){
+			btree(el);
+		}
+	}
+}
+</script>
 </body>
 </html>
+
+
+
+
