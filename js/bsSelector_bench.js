@@ -123,7 +123,7 @@ var bsSelector = function( doc, trim ){
 	className = (function( tagName, clsName ){
 		var reg = {}, r = {length:0};
 		return document['getElementsByClassName'] ? function(cls){
-			console.log( DOC, DOC.getElementsByClassName(cls), cls );
+			//console.log( DOC, DOC.getElementsByClassName(cls), cls );
 			return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );
 		} : function(cls){
 			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = r[cls] || ( r[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i;
@@ -160,7 +160,7 @@ var bsSelector = function( doc, trim ){
 				k = sel.charAt(j);
 				if( hasParent || mParent[k] ) hasParent = 1;
 				if( hasQSAErr || m == 2 && k == '!' ) hasQSAErr = 1;
-				if( ( t2 = mBracket[k] ) && ( b = t2 ) ) continue;
+				if( ( t2 = mBracket[k] ) && ( m = t2 ) == 2 ) continue;
 				if( !( t2 = mEx[k] ) ) t1 = k + t1;
 				if( t2 && m == 2 ) t1 = k + t1;
 				else if( ( t2 = mT0[k] ) == 1 ){
@@ -189,7 +189,7 @@ var bsSelector = function( doc, trim ){
 			}
 			sels[i] = t0;
 		}
-		//console.log(sels);
+		//console.log(sels);return;
 		if( sels.length == 1 ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
@@ -210,7 +210,9 @@ var bsSelector = function( doc, trim ){
 			}
 		}
 		if( !els ) els = tagName['*'] || ( tagName['*'] = doc.getElementsByTagName('*') );
-		if( !sels[0].length ) return arrs[arr._l++] = sels[0], sel.length = 0, arrs[arr._l++] = sel, els;
+		if( !sels[0].length ) return arrs[arrs._l++] = sels[0], sels.length = 0, arrs[arrs._l++] = sels, els;
+		//console.log(sels); return;
+		//console.log(els);return;
 		for( i = 0, j = els.length ; i < j ; i++ ){
 			l = sels.length;
 			while( l-- ){
@@ -225,9 +227,11 @@ var bsSelector = function( doc, trim ){
 						hit = el && compare( el, tokens[++m] );
 					}else if( k == '~' ){
 						m++;
-						while( el = el.previousSibling ) if( el.nodeType == 1 && compare( el, tokens[m] ) ){
-							hit = 1;
-							break;
+						while( (el = el.previousSibling) != null ){
+							if( el.nodeType == 1 && compare( el, tokens[m] ) ){
+								hit = 1;
+								break;
+							}
 						}
 					}else hit = compare( el, token );
 					if( !hit ) break;
