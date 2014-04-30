@@ -194,6 +194,7 @@ var bsSelector = function( doc, trim ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
 			else if( k == '.' ){
+
 				els = className(t0.substr(1)), sels[0].shift();
 				//if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
 			}else if( k == '[' || k == ':' ){
@@ -216,8 +217,8 @@ var bsSelector = function( doc, trim ){
 		for( i = 0, j = els.length ; i < j ; i++ ){
 			l = sels.length;
 			while( l-- ){
-				for( tokens = sels[l], el = els[i], m = 0, n = tokens.length; m < n; m++ ){
-					token = tokens[m];
+				for( tokens = sels[l], m = 0, n = tokens.length; m < n; m++ ){
+					token = tokens[m], el = els[i];
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
 						while( el = el.parentNode ) if( hit = compare( el, tokens[m] ) ) break;

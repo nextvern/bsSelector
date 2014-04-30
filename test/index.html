@@ -13,6 +13,19 @@
 <link rel="shortcut icon" href="http://blog.bsidesoft.com/favicon.ico" type="image/x-icon">
 </head>
 <body>
+<!--
+<div id="sample">
+	<div>d0</div>
+	<p>p0</p>
+	<p>p1</p>
+	<div>d1</div>
+	<p>p2</p>
+	<p>p3</p>
+</div>
+<style>
+div~p~p{color:#f00}
+</style>
+-->
 <div id="stage"></div>
 <div id="result"></div>
 <div id="test"></div>
@@ -29,9 +42,28 @@ bsTest.tear( 'selector Test', function(){
 		'<div class="k0" id="a1"></div>' +
 		'<div class="k0" id="a2"></div>' +
 		'<div class="k0" id="a3"></div>' +
+		'<p id="p0"></p>'+
+		'<p id="p1"></p>'+
 		'<div class="k0" id="a4"></div>' +
+		'<p id="p2"></p>'+
+		'<p id="p3"></p>'+
 		'<span></span><span></span>';
 } );
+bsTest( 'div ~ p ~ p',
+	function(){
+		return query( 'div ~ p ~ p' ).length;
+	}, 3,
+	function(){
+		return query( 'div ~ p ~ p' )[0].id;
+	}, 'p1',
+	function(){
+		return query( 'div ~ p ~ p' )[1].id;
+	}, 'p2',
+	function(){
+		return query( 'div ~ p ~ p' )[2].id;
+	}, 'p3'
+);
+/*
 bsTest( 'id',
 	function(){
 		return query( '#a0' )[0].id;
@@ -58,12 +90,18 @@ bsTest( 'id',
 		return query( '#a0,#a1,#a2' )[2].id;
 	}, 'a2'
 );
-bsTest( 'class', function(){
-	return query( '.k0' ).length;
-}, 5 );
+bsTest( 'class',
+	function(){
+		return query( '.k0' ).length;
+	}, 5,
+	function(){
+		return query( '.k0' )[0].id;
+	}, 'a0'
+);
 bsTest( 'tag', function(){
 	return query( 'span' ).length;
 }, 2 );
+*/
 </script>
 </body>
 </html>
