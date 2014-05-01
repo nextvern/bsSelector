@@ -70,7 +70,7 @@ function( Benchmark, document, selectors ) {
 			"sizzle":         "Sizzle( s, d )",
 			// "dojo":           "dojo.query( s, d )",
 			"mootools-slick": "Slick.search( d, s )",
-			"bsSelector": "bsSelector( s, d )"
+			"bsSelector": "query( s, d )"
 			// "nwmatcher":      "NW.Dom.select( s, d )"
 		},
 
