@@ -1,4 +1,4 @@
-/* bsSelector v0.1
+/* bsSelector v0.2
  * Copyright (c) 2013 by ProjectBS Committe and contributors. 
  * http://www.bsplugin.com All rights reserved.
  * Licensed under the BSD license. See http://opensource.org/licenses/BSD-3-Clause
@@ -11,60 +11,67 @@ var bsSelector = function( doc, trim ){
 	var compare = (function(){
 		var r0 = /"|'/g, i, j,//"
 		mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1},
+		mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
 		enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
-		checked = {INPUT:1, radio:1, checkbox:1, OPTION:2};
+		checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
+		skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'not':1, 'selection':1, 
+			'eq':1, 'gt':1, 'lt':1,
+			'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
+		};
 		return function( el, token ){
-			var data, time, indexes, parent, children, tag, update, dir, t0, t1, k, v, i, j, m;
+			var data, time, indexes, parent, children, tag, update, dir, t0, t1,t2,  k, v, i, j, m;
 			switch( token.charAt(0) ){
 			case'#':return token.substr(1) == el.id;
 			case'.':return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
 			case'[':
-				t0 = el.getAttribute( k = token.substr(1) ), i = k.indexOf('=');
-				if( i == -1 ) return t0 === null ? 0 : 1;
-				if( t0 === null ) return 0;
-				t1 = k.charAt( i - 1 ), v = k.substr( i + 1 ), k = k.substring( 0, i - 1 );
+				if( ( i = token.indexOf('=') ) == -1 ) return el.getAttribute(token.substr(1)) === null ? 0 : 1;
+				if( ( t0 = el.getAttribute( token.substring( 1, i - ( mT0[t1 = token.charAt( i - 1 )] ? 1 : 0 ) ) ) ) === null ) return;
+				v = token.substr( i + 1 );
 				switch( t1 ){
 				case'~':return t0.split(' ').indexOf(v) > -1;
 				case'|':return t0.split('-').indexOf(v) > -1;
 				case'^':return t0.indexOf(v) == 0;
 				case'$':return t0.lastIndexOf(v) == ( t0.length - v.length );
 				case'*':return t0.indexOf(v) > -1;
-				case'!':return t0 !== val;
-				default:return t0 === val;
+				case'!':return t0 !== v;
+				default:return t0 === v;
 				}
 			case':':
 				k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
 				if( v ) k = k.substring( 0, i );
+				if( skip[k] ) return;
+				tag = el.tagName;
 				switch( k ){
-				case'active':case'visited':case'first-line':case'first-letter':case'hover':case'focus':return;
-				case'link':return el.tagName == 'A' && el.getAttribute('href');
-				case'root':return el.tagName == 'HTML';
+				case'link':return tag == 'A' && el.getAttribute('href');
+				case'root':return tag == 'HTML';
+				case'lang':return el.getAttribute('lang') == v;
 				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
-				case'checked':return t0 = checked[el.tagName], ( t0 == 1 && el.checked == true && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
-				case'enabled':return enabled[t0 = el.tagName] && !el.getAttribute('disabled');
-				case'disabled':return enabled[t0 = el.tagName] && el.getAttribute('disabled');
+				case'checked':return t0 = checked[tag], ( t0 == 1 && el.checked == true && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
+				case'enabled':return enabled[tag] && el.getAttribute('disabled') === null;
+				case'disabled':return enabled[tag] && el.getAttribute('disabled') !== null;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
 					if( ( children = el.parentNode.childNodes ) && ( i = j = children.length ) ){
-						m = 0;
-						if( t1 = first[k] ) tag = el.tagName;
+						m = 0, t1 = mTag[k];
 						while( i-- ){
 							t0 = children[dir ? j - i - 1 : i];
 							if( t0.nodeType == 1 && ( t1 ? tag == t0.tagName : 1 ) ) return !m++ && t0 == el;
 						}
 					}
 					return;
-				case'only-of-type':dir = 1;case'only-child':
+				case'only-of-type':case'only-child':
 					if( ( children = el.parentNode.childNodes ) && ( i = children.length ) ){
-						m = 0;
-						if( dir ) tag = el.tagName;
+						m = 0, t1 = mTag[k];
 						while( i-- ){
 							t0 = children[i];	
 							if( t0.nodeType == 1 ){
-								if( m++ && ( dir ? tag == t0.tagName : 1 ) ) return;
-								else t1 = t0;
+								console.log( k, i, t1, t0 );
+								if( t1 ? tag == t0.tagName : 1 ){
+									if( m++ ) return;
+									t2 = t0;
+								}
 							}
 						}
-						return el == t1;
+						return el == t2;
 					}
 					return;
 				default:
@@ -112,8 +119,7 @@ var bsSelector = function( doc, trim ){
 						return;
 					}
 				}
-			default:
-				return token == el.tagName || token == '*';
+			default: return token == el.tagName || token == '*';
 			}
 		};
 	})(),
@@ -189,11 +195,11 @@ var bsSelector = function( doc, trim ){
 			}
 			sels[i] = t0;
 		}
-		//console.log(sels);return;
 		if( sels.length == 1 ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
 			else if( k == '.' ){
+
 				els = className(t0.substr(1)), sels[0].shift();
 				//if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
 			}else if( k == '[' || k == ':' ){
@@ -211,12 +217,11 @@ var bsSelector = function( doc, trim ){
 		}
 		if( !els ) els = tagName['*'] || ( tagName['*'] = doc.getElementsByTagName('*') );
 		if( !sels[0].length ) return arrs[arrs._l++] = sels[0], sels.length = 0, arrs[arrs._l++] = sels, els;
-		//console.log(sels); return;
-		//console.log(els);return;
 		for( i = 0, j = els.length ; i < j ; i++ ){
 			l = sels.length;
 			while( l-- ){
-				for( tokens = sels[l], el = els[i], m = 0, n = tokens.length; m < n; m++ ){
+				el = els[i];
+				for( tokens = sels[l], m = 0, n = tokens.length; m < n; m++ ){
 					token = tokens[m];
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
@@ -245,4 +250,4 @@ var bsSelector = function( doc, trim ){
 		return r;
 	};
 };
-var bsQuery = bsSelector( document, /^\s*|\s*$/g, {}, null );
+var query = bsSelector( document, /^\s*|\s*$/g );
