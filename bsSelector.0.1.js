@@ -222,7 +222,7 @@ var bsSelector = function( doc, trim ){
 			while( l-- ){
 				el = els[i];
 				for( tokens = sels[l], m = 0, n = tokens.length; m < n; m++ ){
-					token = tokens[m];
+					token = tokens[m], hit = 0;
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
 						while( el = el.parentNode ) if( hit = compare( el, tokens[m] ) ) break;

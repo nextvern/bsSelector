@@ -217,12 +217,12 @@ var bsSelector = function( doc, trim ){
 		}
 		if( !els ) els = tagName['*'] || ( tagName['*'] = doc.getElementsByTagName('*') );
 		if( !sels[0].length ) return arrs[arrs._l++] = sels[0], sels.length = 0, arrs[arrs._l++] = sels, els;
-		for( i = 0, j = els.length ; i < j ; i++ ){
+		for( i = 0, j = els.length; i < j; i++ ){
 			l = sels.length;
 			while( l-- ){
 				el = els[i];
 				for( tokens = sels[l], m = 0, n = tokens.length; m < n; m++ ){
-					token = tokens[m];
+					token = tokens[m], hit = 0;
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
 						while( el = el.parentNode ) if( hit = compare( el, tokens[m] ) ) break;
@@ -232,10 +232,9 @@ var bsSelector = function( doc, trim ){
 						hit = el && compare( el, tokens[++m] );
 					}else if( k == '~' ){
 						m++;
-						while( (el = el.previousSibling) ){
+						while( el = el.previousSibling ){
 							if( el.nodeType == 1 && compare( el, tokens[m] ) ){
-								hit = 1;
-								break;
+								hit = 1; break;
 							}
 						}
 					}else hit = compare( el, token );
