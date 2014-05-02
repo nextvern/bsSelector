@@ -119,8 +119,7 @@ var bsSelector = function( doc, trim ){
 						return;
 					}
 				}
-			default:
-				return token == el.tagName || token == '*';
+			default: return token == el.tagName || token == '*';
 			}
 		};
 	})(),
@@ -221,8 +220,9 @@ var bsSelector = function( doc, trim ){
 		for( i = 0, j = els.length ; i < j ; i++ ){
 			l = sels.length;
 			while( l-- ){
+				el = els[i];
 				for( tokens = sels[l], m = 0, n = tokens.length; m < n; m++ ){
-					token = tokens[m], el = els[i];
+					token = tokens[m];
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
 						while( el = el.parentNode ) if( hit = compare( el, tokens[m] ) ) break;
