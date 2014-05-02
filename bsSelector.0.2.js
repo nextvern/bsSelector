@@ -8,22 +8,25 @@
 */
 var bsSelector = function( doc, trim ){
 	'use strict';
-	var compare = (function(){
-		var r0 = /"|'/g, i, j,//"
-		mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1},
-		mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
-		enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
-		checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
-		skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'not':1, 'selection':1, 
-			'eq':1, 'gt':1, 'lt':1,
-			'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
-		};
-		return function( el, token ){
-			var data, time, indexes, parent, children, tag, update, dir, t0, t1,t2,  k, v, i, j, m;
-			switch( token.charAt(0) ){
-			case'#':return token.substr(1) == el.id;
-			case'.':return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
-			case'[':
+	var compare = {
+		// id
+		'#':function(el, token){
+			return token.substr(1) == el.id;
+		},
+		// class
+		'.':function(el, token){
+			var t0, k;
+			return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
+		},
+		// tag
+		'tag':function(el, token){
+			return token == el.tagName || token == '*';
+		},
+		// pseudo
+		'[':(function(){
+			var mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1};
+			return function(el, token){
+				var t0, t1, i, v;
 				if( ( i = token.indexOf('=') ) == -1 ) return el.getAttribute(token.substr(1)) === null ? 0 : 1;
 				if( ( t0 = el.getAttribute( token.substring( 1, i - ( mT0[t1 = token.charAt( i - 1 )] ? 1 : 0 ) ) ) ) === null ) return;
 				v = token.substr( i + 1 );
@@ -36,7 +39,19 @@ var bsSelector = function( doc, trim ){
 				case'!':return t0 !== v;
 				default:return t0 === v;
 				}
-			case':':
+			};
+		})(),
+		// filter
+		':':(function(trim){
+			var mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
+			enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
+			checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
+			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'not':1, 'selection':1, 
+				'eq':1, 'gt':1, 'lt':1,
+				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
+			};
+			return function(el, token){
+				var parent, children, tag, dir, t0, t1, t2, k, v, i, j, m;
 				k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
 				if( v ) k = k.substring( 0, i );
 				if( skip[k] ) return;
@@ -46,7 +61,7 @@ var bsSelector = function( doc, trim ){
 				case'root':return tag == 'HTML';
 				case'lang':return el.getAttribute('lang') == v;
 				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
-				case'checked':return t0 = checked[tag], ( t0 == 1 && el.checked == true && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
+				case'checked':return t0 = checked[tag], ( t0 == 1 && el.checked && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
 				case'enabled':return enabled[tag] && el.getAttribute('disabled') === null;
 				case'disabled':return enabled[tag] && el.getAttribute('disabled') !== null;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
@@ -64,7 +79,7 @@ var bsSelector = function( doc, trim ){
 						while( i-- ){
 							t0 = children[i];	
 							if( t0.nodeType == 1 ){
-								console.log( k, i, t1, t0 );
+								//console.log( k, i, t1, t0 );
 								if( t1 ? tag == t0.tagName : 1 ){
 									if( m++ ) return;
 									t2 = t0;
@@ -118,11 +133,10 @@ var bsSelector = function( doc, trim ){
 						}
 						return;
 					}
-				}
-			default: return token == el.tagName || token == '*';
-			}
-		};
-	})(),
+				}//
+			};
+		})(trim)
+	},
 	isQSA = doc['querySelectorAll'] ? 1 : 0,
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
@@ -225,19 +239,19 @@ var bsSelector = function( doc, trim ){
 					token = tokens[m], hit = 0;
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
-						while( el = el.parentNode ) if( hit = compare( el, tokens[m] ) ) break;
-					}else if( k == '>' ) hit = compare( el = el.parentNode, tokens[++m] );
+						while( el = el.parentNode ) if( hit = ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : compare['tag']( el, tokens[m] ) ) ) break;
+					}else if( k == '>' ) hit = ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el = el.parentNode, tokens[m] ) : compare['tag']( el = el.parentNode, tokens[m] ) );
 					else if( k == '+' ){
 						while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
-						hit = el && compare( el, tokens[++m] );
+						hit = el && ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el, tokens[m] ) : compare['tag']( el, tokens[m] ) );
 					}else if( k == '~' ){
 						m++;
 						while( el = el.previousSibling ){
-							if( el.nodeType == 1 && compare( el, tokens[m] ) ){
+							if( el.nodeType == 1 && ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : compare['tag']( el, tokens[m] ) ) ){
 								hit = 1; break;
 							}
 						}
-					}else hit = compare( el, token );
+					}else hit = ( (t0 = compare[ token.charAt(0) ]) ? t0( el, token ) : compare['tag']( el, token ) );
 					if( !hit ) break;
 				}
 				if( i == j - 1 ) tokens.length = 0, arrs[arrs._l++] = tokens;
