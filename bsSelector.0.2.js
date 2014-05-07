@@ -51,7 +51,7 @@ var bsSelector = function( doc, trim ){
 				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
 			};
 			return function(el, token){
-				var parent, children, tag, dir, t0, t1, t2, k, v, i, j, m;
+				var parent, children, tag, dir, t0, t1, t2, k, v, i, j, m, dd, tname, ename, lname;
 				k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
 				if( v ) k = k.substring( 0, i );
 				if( skip[k] ) return;
@@ -65,73 +65,102 @@ var bsSelector = function( doc, trim ){
 				case'enabled':return enabled[tag] && el.getAttribute('disabled') === null;
 				case'disabled':return enabled[tag] && el.getAttribute('disabled') !== null;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
-					if( ( children = el.parentNode.childNodes ) && ( i = j = children.length ) ){
-						m = 0, t1 = mTag[k];
-						while( i-- ){
-							t0 = children[dir ? j - i - 1 : i];
-							if( t0.nodeType == 1 && ( t1 ? tag == t0.tagName : 1 ) ) return !m++ && t0 == el;
-						}
-					}
-					return;
-				case'only-of-type':case'only-child':
-					if( ( children = el.parentNode.childNodes ) && ( i = children.length ) ){
-						m = 0, t1 = mTag[k];
-						while( i-- ){
-							t0 = children[i];	
-							if( t0.nodeType == 1 ){
-								//console.log( k, i, t1, t0 );
-								if( t1 ? tag == t0.tagName : 1 ){
-									if( m++ ) return;
-									t2 = t0;
+					dd = domData(el);
+					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
+						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
+					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
+						if( ( children = el.parentNode.childNodes ) && ( i = j = children.length ) ){
+							m = 0;
+							while( i-- ){
+								t0 = children[dir ? j - i - 1 : i];
+								if( t0.nodeType == 1 && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
+									(t2 = domData(t0))[tname] = ( t1 ? tag : '' ) + bsRseq,
+									t2[ename] = t0;break;
 								}
 							}
 						}
-						return el == t2;
 					}
-					return;
+					return dd[ename] == el;
+				case'only-of-type':case'only-child':
+					parent = el.parentNode, dd = domData(parent),
+					t1 = mTag[k];
+					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
+					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
+						if( ( children = parent.childNodes ) && ( i = children.length ) ){
+							m = 0;
+							while( i-- ){
+								t0 = children[i];	
+								if( t0.nodeType == 1 ){
+									if( t1 ? tag == t0.tagName : 1 ){
+										if( !m++ ) t2 = t0;
+									}
+								}
+							}
+							dd[tname] = ( t1 ? tag : '' ) + bsRseq,
+							dd[ename] = t2,
+							dd[lname] = m;
+						}
+					}
+					return dd[lname] == 1 && dd[ename] == el;
 				default:
 					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( children = parent.childNodes ) || !( j = i = children.length ) ) return;
 					if( v == 'n' ) return 1;
-					t1 = 0;
+					t1 = 1, dd = domData(el);
 					switch( k ){
 					case'nth-child':
-						for( i = 0 ; i < j ; i++ ){
-							t0 = children[i];
-							if( t0.nodeType == 1 ){
-								t1++;
-								if( el == t0 ) return j = t1 % 2, v == 'even' || v == '2n' ? j == 0 : v == 'odd' || v == '2n+1' ? j == 1 : t1 == v;
+						if( !dd.DQtime || dd.DQtime != bsRseq ){
+							for( i = 0 ; i < j ; i++ ){
+								t0 = children[i];
+								if( t0.nodeType == 1 ){
+									(t2 = domData(t0)).DQtime = bsRseq,
+									t2.DQindex = t1++;
+								}
 							}
 						}
-						return;
+						return t0 = dd.DQindex, v == 'even' || v == '2n' ? t0 % 2 == 0 :
+						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
+						t0 == v;
 					case'nth-last-child':
-						while( i-- ){
-							t0 = children[i];
-							if( t0.nodeType == 1 ){
-								t1++;
-								if( el == t0 ) return j = t1 % 2, v == 'even' || v == '2n' ? j == 0 : v == 'odd' || v == '2n+1' ? j == 1 : t1 == v;
+						if( !dd.DQtimeL || dd.DQtimeL != bsRseq ){
+							while( i-- ){
+								t0 = children[i];
+								if( t0.nodeType == 1 ){
+									(t2 = domData(t0)).DQtimeL = bsRseq,
+									t2.DQindexL = t1++;
+								}
 							}
 						}
-						return;
+						return t0 = dd.DQindexL, v == 'even' || v == '2n' ? t0 % 2 == 0 :
+						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
+						t0 == v;
 					case'nth-of-type':
-						tag = el.tagName;
-						for( i = 0 ; i < j ; i++ ){
-							t0 = children[i];
-							if( t0.nodeType == 1 && t0.tagName == tag ){
-								t1++;
-								if( el == t0 ) return j = t1 % 2, v == 'even' || v == '2n' ? j == 0 : v == 'odd' || v == '2n+1' ? j == 1 : t1 == v;
+						if( !dd.DQtimeT || dd.DQtimeT != tag + bsRseq ){
+							for( i = 0 ; i < j ; i++ ){
+								t0 = children[i];
+								if( t0.nodeType == 1 && t0.tagName == tag ){
+									(t2 = domData(t0)).DQtimeT = tag + bsRseq,
+									t2.DQindexT = t1++;
+								}
 							}
 						}
-						return;
+						return t0 = dd.DQindexT, v == 'even' || v == '2n' ? t0 % 2 == 0 :
+						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
+						t0 == v;
 					case'nth-last-of-type':
-						tag = el.tagName;
-						while( i-- ){
-							t0 = children[i];
-							if( t0.nodeType == 1 && t0.tagName == tag ){
-								t1++;
-								if( el == t0 ) return j = t1 % 2, v == 'even' || v == '2n' ? j == 0 : v == 'odd' || v == '2n+1' ? j == 1 : t1 == v;
+						if( !dd.DQtimeTL || dd.DQtimeTL != tag + bsRseq ){
+							while( i-- ){
+								t0 = children[i];
+								if( t0.nodeType == 1 && t0.tagName == tag ){
+									(t2 = domData(t0)).DQtimeTL = tag + bsRseq,
+									t2.DQindexTL = t1++;
+									/*t1++;
+									if( el == t0 ) return j = t1 % 2, v == 'even' || v == '2n' ? j == 0 : v == 'odd' || v == '2n+1' ? j == 1 : t1 == v;*/
+								}
 							}
 						}
-						return;
+						return t0 = dd.DQindexTL, v == 'even' || v == '2n' ? t0 % 2 == 0 :
+						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
+						t0 == v;
 					}
 				}//
 			};
@@ -152,6 +181,15 @@ var bsSelector = function( doc, trim ){
 			return r;
 		};
 	})( tagName, clsName ),
+	domData = (function(){
+		var id = 1, data = {};
+		return function( el, k, v ){
+			var t0;
+			if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
+			return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
+		};
+	})(),
+	bsRseq = 0,
 	mQSA = {' ':1,'+':1,'~':1,':':1,'[':1},
 	mParent = {' ':1, '>':1}, mQSAErr = '!', mBracket = {'[':1, '(':1, ']':2, ')':2},
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
@@ -163,7 +201,7 @@ var bsSelector = function( doc, trim ){
 			hasParent, hasQSAErr, hasQS,
 			t0, t1, t2, t3, i, j, k, l, m, n,
 			el, els, tags, key, hit, token, tokens;
-		
+
 		if( !r ) r = R;
 		r.length = 0, doc ? ( DOC = doc ) : ( doc = DOC );
 		if( rClsTagId.test(query) ) switch( query.charAt(0) ){
@@ -231,6 +269,7 @@ var bsSelector = function( doc, trim ){
 		}
 		if( !els ) els = tagName['*'] || ( tagName['*'] = doc.getElementsByTagName('*') );
 		if( !sels[0].length ) return arrs[arrs._l++] = sels[0], sels.length = 0, arrs[arrs._l++] = sels, els;
+		bsRseq++;
 		for( i = 0, j = els.length; i < j; i++ ){
 			l = sels.length;
 			while( l-- ){
