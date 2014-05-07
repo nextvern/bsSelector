@@ -18,10 +18,6 @@ var bsSelector = function( doc, trim ){
 			var t0, k;
 			return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
 		},
-		// tag
-		'tag':function(el, token){
-			return token == el.tagName || token == '*';
-		},
 		// pseudo
 		'[':(function(){
 			var mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1};
@@ -50,29 +46,28 @@ var bsSelector = function( doc, trim ){
 				'eq':1, 'gt':1, 'lt':1,
 				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
 			};
-			return function(el, token){
-				var parent, children, tag, dir, t0, t1, t2, k, v, i, j, m, dd, tname, ename, lname;
+			return function filters(el, token){
+				var parent, childs, tag, dir, t0, t1, t2, k, v, i, j, m, dd, tname, ename, lname;
 				k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
 				if( v ) k = k.substring( 0, i );
 				if( skip[k] ) return;
-				tag = el.tagName;
 				switch( k ){
-				case'link':return tag == 'A' && el.getAttribute('href');
-				case'root':return tag == 'HTML';
+				case'link':return el.tagName == 'A' && el.getAttribute('href');
+				case'root':return el.tagName == 'HTML';
 				case'lang':return el.getAttribute('lang') == v;
 				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
-				case'checked':return t0 = checked[tag], ( t0 == 1 && el.checked && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
-				case'enabled':return enabled[tag] && el.getAttribute('disabled') === null;
-				case'disabled':return enabled[tag] && el.getAttribute('disabled') !== null;
+				case'checked':return t0 = checked[el.tagName], ( t0 == 1 && el.checked && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
+				case'enabled':return enabled[el.tagName] && el.getAttribute('disabled') === null;
+				case'disabled':return enabled[el.tagName] && el.getAttribute('disabled') !== null;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
-					dd = domData(el);
+					dd = domData(el), tag = el.tagName;
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( children = el.parentNode.childNodes ) && ( i = j = children.length ) ){
+						if( ( childs = el.parentNode.childNodes ) && ( i = j = childs.length ) ){
 							m = 0;
 							while( i-- ){
-								t0 = children[dir ? j - i - 1 : i];
+								t0 = childs[dir ? j - i - 1 : i];
 								if( t0.nodeType == 1 && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
 									(t2 = domData(t0))[tname] = ( t1 ? tag : '' ) + bsRseq,
 									t2[ename] = t0;break;
@@ -83,13 +78,13 @@ var bsSelector = function( doc, trim ){
 					return dd[ename] == el;
 				case'only-of-type':case'only-child':
 					parent = el.parentNode, dd = domData(parent),
-					t1 = mTag[k];
+					t1 = mTag[k], tag = el.tagName;
 					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( children = parent.childNodes ) && ( i = children.length ) ){
+						if( ( childs = parent.childNodes ) && ( i = childs.length ) ){
 							m = 0;
 							while( i-- ){
-								t0 = children[i];	
+								t0 = childs[i];
 								if( t0.nodeType == 1 ){
 									if( t1 ? tag == t0.tagName : 1 ){
 										if( !m++ ) t2 = t0;
@@ -103,14 +98,14 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[lname] == 1 && dd[ename] == el;
 				default:
-					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( children = parent.childNodes ) || !( j = i = children.length ) ) return;
+					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = parent.childNodes ) || !( j = i = childs.length ) ) return;
 					if( v == 'n' ) return 1;
 					t1 = 1, dd = domData(el);
 					switch( k ){
 					case'nth-child':
 						if( !dd.DQtime || dd.DQtime != bsRseq ){
-							for( i = 0 ; i < j ; i++ ){
-								t0 = children[i];
+							for( i = 0; i < j; i++ ){
+								t0 = childs[i];
 								if( t0.nodeType == 1 ){
 									(t2 = domData(t0)).DQtime = bsRseq,
 									t2.DQindex = t1++;
@@ -123,7 +118,7 @@ var bsSelector = function( doc, trim ){
 					case'nth-last-child':
 						if( !dd.DQtimeL || dd.DQtimeL != bsRseq ){
 							while( i-- ){
-								t0 = children[i];
+								t0 = childs[i];
 								if( t0.nodeType == 1 ){
 									(t2 = domData(t0)).DQtimeL = bsRseq,
 									t2.DQindexL = t1++;
@@ -134,9 +129,10 @@ var bsSelector = function( doc, trim ){
 						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
 						t0 == v;
 					case'nth-of-type':
+						tag = el.tagName;
 						if( !dd.DQtimeT || dd.DQtimeT != tag + bsRseq ){
 							for( i = 0 ; i < j ; i++ ){
-								t0 = children[i];
+								t0 = childs[i];
 								if( t0.nodeType == 1 && t0.tagName == tag ){
 									(t2 = domData(t0)).DQtimeT = tag + bsRseq,
 									t2.DQindexT = t1++;
@@ -147,14 +143,13 @@ var bsSelector = function( doc, trim ){
 						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
 						t0 == v;
 					case'nth-last-of-type':
+						tag = el.tagName;
 						if( !dd.DQtimeTL || dd.DQtimeTL != tag + bsRseq ){
 							while( i-- ){
-								t0 = children[i];
+								t0 = childs[i];
 								if( t0.nodeType == 1 && t0.tagName == tag ){
 									(t2 = domData(t0)).DQtimeTL = tag + bsRseq,
 									t2.DQindexTL = t1++;
-									/*t1++;
-									if( el == t0 ) return j = t1 % 2, v == 'even' || v == '2n' ? j == 0 : v == 'odd' || v == '2n+1' ? j == 1 : t1 == v;*/
 								}
 							}
 						}
@@ -183,7 +178,7 @@ var bsSelector = function( doc, trim ){
 	})( tagName, clsName ),
 	domData = (function(){
 		var id = 1, data = {};
-		return function( el, k, v ){
+		return function domData( el, k, v ){
 			var t0;
 			if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
 			return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
@@ -196,7 +191,7 @@ var bsSelector = function( doc, trim ){
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
 	R = {length:0}, arrs = {_l:0};
 	
-	return function( query, doc, r ){
+	return function selector( query, doc, r ){
 		var sels, sel, 
 			hasParent, hasQSAErr, hasQS,
 			t0, t1, t2, t3, i, j, k, l, m, n,
@@ -278,19 +273,21 @@ var bsSelector = function( doc, trim ){
 					token = tokens[m], hit = 0;
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
-						while( el = el.parentNode ) if( hit = ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : compare['tag']( el, tokens[m] ) ) ) break;
-					}else if( k == '>' ) hit = ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el = el.parentNode, tokens[m] ) : compare['tag']( el = el.parentNode, tokens[m] ) );
+						while( el = el.parentNode )
+							if( hit = ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : (tokens[m] == el.tagName || tokens[m] == '*') ) ) break;
+					}else if( k == '>' ) hit = ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el = el.parentNode, tokens[m] ) :
+						(tokens[m] == (el = el.parentNode).tagName || tokens[m] == '*') );
 					else if( k == '+' ){
 						while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
-						hit = el && ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el, tokens[m] ) : compare['tag']( el, tokens[m] ) );
+						hit = el && ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el, tokens[m] ) : (tokens[m] == el.tagName || tokens[m] == '*') );
 					}else if( k == '~' ){
 						m++;
 						while( el = el.previousSibling ){
-							if( el.nodeType == 1 && ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : compare['tag']( el, tokens[m] ) ) ){
+							if( el.nodeType == 1 && ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : (tokens[m] == el.tagName || tokens[m] == '*') ) ){
 								hit = 1; break;
 							}
 						}
-					}else hit = ( (t0 = compare[ token.charAt(0) ]) ? t0( el, token ) : compare['tag']( el, token ) );
+					}else hit = ( (t0 = compare[ token.charAt(0) ]) ? t0( el, token ) : (token == el.tagName || token == '*') );
 					if( !hit ) break;
 				}
 				if( i == j - 1 ) tokens.length = 0, arrs[arrs._l++] = tokens;
