@@ -8,4 +8,4 @@ This project is sub-project of projectBS.
 https://github.com/projectBS
 
 ## benchmark
-http://projectbs.github.io/bsSelector/0.1/speed/
+http://projectbs.github.io/bsSelector/0.2/speed/
