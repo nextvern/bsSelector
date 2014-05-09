@@ -40,6 +40,7 @@ var bsSelector = function( doc, trim ){
 		// filter
 		':':(function(trim){
 			var mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
+			nChild = {'first-child':'firstElementChild', 'last-child':'lastElementChild'},
 			enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
 			checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
 			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'not':1, 'selection':1, 
@@ -60,6 +61,7 @@ var bsSelector = function( doc, trim ){
 				case'enabled':return enabled[el.tagName] && el.getAttribute('disabled') === null;
 				case'disabled':return enabled[el.tagName] && el.getAttribute('disabled') !== null;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
+					if( isNelChld && (t1 = nChild[k]) ) return el.parentNode[t1] == el;
 					dd = domData(el), tag = el.tagName;
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
@@ -77,6 +79,7 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[ename] == el;
 				case'only-of-type':case'only-child':
+					if( isNchld && k == 'only-child' ) return el.parentNode.children.length == 1;
 					parent = el.parentNode, dd = domData(parent),
 					t1 = mTag[k], tag = el.tagName;
 					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
@@ -85,9 +88,8 @@ var bsSelector = function( doc, trim ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[i];
-								if( (isNchld ? 1:t0.nodeType == 1) && (t1 ? tag == t0.tagName : 1) && !m++ ){
+								if( (isNchld ? 1:t0.nodeType == 1 ) && (t1 ? tag == t0.tagName : 1) && !m++ )
 									t2 = t0;
-								}
 							}
 							dd[tname] = ( t1 ? tag : '' ) + bsRseq,
 							dd[ename] = t2,
@@ -188,12 +190,16 @@ var bsSelector = function( doc, trim ){
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
 	R = {length:0}, arrs = {_l:0},
-	isNchld = DOC.createElement('div').children ? 1:0;
+	tEl = DOC.createElement('ul'),
+	isNchld, isNelChld;
+	tEl.innerHTML = '<li>1</li>',
+	isNchld = tEl.children ? 1:0,
+	isNelChld = tEl.firstElementChild && tEl.lastElementChild ? 1:0;
 	return function selector( query, doc, r ){
-		var sels, sel, 
+		var sels, sel,
 			hasParent, hasQSAErr, hasQS,
 			t0, t1, t2, t3, i, j, k, l, m, n,
-			el, els, tags, key, hit, token, tokens;
+			el, els, hit, token, tokens;
 
 		if( !r ) r = R;
 		r.length = 0, doc ? ( DOC = doc ) : ( doc = DOC );
