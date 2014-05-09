@@ -64,11 +64,11 @@ var bsSelector = function( doc, trim ){
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = el.parentNode.childNodes ) && ( i = j = childs.length ) ){
+						if( ( childs = isNchld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[dir ? j - i - 1 : i];
-								if( t0.nodeType == 1 && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
+								if( (isNchld ? 1:t0.nodeType == 1) && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
 									(t2 = domData(t0))[tname] = ( t1 ? tag : '' ) + bsRseq,
 									t2[ename] = t0;break;
 								}
@@ -81,14 +81,12 @@ var bsSelector = function( doc, trim ){
 					t1 = mTag[k], tag = el.tagName;
 					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = parent.childNodes ) && ( i = childs.length ) ){
+						if( ( childs = isNchld ? parent.children : parent.childNodes ) && ( i = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[i];
-								if( t0.nodeType == 1 ){
-									if( t1 ? tag == t0.tagName : 1 ){
-										if( !m++ ) t2 = t0;
-									}
+								if( (isNchld ? 1:t0.nodeType == 1) && (t1 ? tag == t0.tagName : 1) && !m++ ){
+									t2 = t0;
 								}
 							}
 							dd[tname] = ( t1 ? tag : '' ) + bsRseq,
@@ -98,7 +96,8 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[lname] == 1 && dd[ename] == el;
 				default:
-					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = parent.childNodes ) || !( j = i = childs.length ) ) return;
+					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = isNchld ? parent.children : parent.childNodes ) || !( j = i = childs.length ) )
+						return;
 					if( v == 'n' ) return 1;
 					t1 = 1, dd = domData(el);
 					switch( k ){
@@ -106,7 +105,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtime || dd.DQtime != bsRseq ){
 							for( i = 0; i < j; i++ ){
 								t0 = childs[i];
-								if( t0.nodeType == 1 ){
+								if( isNchld ? 1:t0.nodeType == 1 ){
 									(t2 = domData(t0)).DQtime = bsRseq,
 									t2.DQindex = t1++;
 								}
@@ -119,7 +118,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeL || dd.DQtimeL != bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
-								if( t0.nodeType == 1 ){
+								if( isNchld ? 1:t0.nodeType == 1 ){
 									(t2 = domData(t0)).DQtimeL = bsRseq,
 									t2.DQindexL = t1++;
 								}
@@ -133,7 +132,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeT || dd.DQtimeT != tag + bsRseq ){
 							for( i = 0 ; i < j ; i++ ){
 								t0 = childs[i];
-								if( t0.nodeType == 1 && t0.tagName == tag ){
+								if( (isNchld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
 									(t2 = domData(t0)).DQtimeT = tag + bsRseq,
 									t2.DQindexT = t1++;
 								}
@@ -147,7 +146,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeTL || dd.DQtimeTL != tag + bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
-								if( t0.nodeType == 1 && t0.tagName == tag ){
+								if( (isNchld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
 									(t2 = domData(t0)).DQtimeTL = tag + bsRseq,
 									t2.DQindexTL = t1++;
 								}
@@ -166,8 +165,7 @@ var bsSelector = function( doc, trim ){
 	DOC = document, tagName = {}, clsName = {},
 	className = (function( tagName, clsName ){
 		var reg = {}, r = {length:0};
-		return document['getElementsByClassName'] ? function(cls){
-			//console.log( DOC, DOC.getElementsByClassName(cls), cls );
+		return DOC['getElementsByClassName'] ? function(cls){
 			return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );
 		} : function(cls){
 			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = r[cls] || ( r[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i;
@@ -189,8 +187,8 @@ var bsSelector = function( doc, trim ){
 	mParent = {' ':1, '>':1}, mQSAErr = '!', mBracket = {'[':1, '(':1, ']':2, ')':2},
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
-	R = {length:0}, arrs = {_l:0};
-	
+	R = {length:0}, arrs = {_l:0},
+	isNchld = DOC.createElement('div').children ? 1:0;
 	return function selector( query, doc, r ){
 		var sels, sel, 
 			hasParent, hasQSAErr, hasQS,
@@ -204,7 +202,7 @@ var bsSelector = function( doc, trim ){
 			case'.':return className(query.substr(1));
 			default:return tagName[query] || ( tagName[query] = doc.getElementsByTagName(query) );
 		}
-		//if( isQSA && ( i = query.indexOf(',') ) > -1 && query.indexOf('!') < 0 ) return doc.querySelectorAll(query);
+		if( isQSA && ( i = query.indexOf(',') ) > -1 && query.indexOf('!') < 0 ) return doc.querySelectorAll(query);
 		if( i == -1 ) sels = arrs._l ? arrs[--arrs._l] : [], sels[0] = query, i = 1;
 		else sels = query.split(','), i = sels.length;
 		while( i-- ){
@@ -248,9 +246,9 @@ var bsSelector = function( doc, trim ){
 			else if( k == '.' ){
 
 				els = className(t0.substr(1)), sels[0].shift();
-				//if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
+				if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
 			}else if( k == '[' || k == ':' ){
-				//if( hasQS ) return doc.querySelectorAll(query);
+				if( hasQS ) return doc.querySelectorAll(query);
 				if( !hasParent ){
 					t0 = sels[0][sels[0].length - 1], k = t0.charAt(0);
 					if( k == '#' ) sels[0].pop(), els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById( t0.substr(1) );
@@ -259,7 +257,7 @@ var bsSelector = function( doc, trim ){
 				}
 			}else if( rTag.test(t0) ){
 				sels[0].shift(), els = tagName[t0] || ( tagName[t0] = doc.getElementsByTagName(t0) );
-				//if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
+				if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
 			}
 		}
 		if( !els ) els = tagName['*'] || ( tagName['*'] = doc.getElementsByTagName('*') );
