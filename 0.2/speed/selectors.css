@@ -33,7 +33,7 @@ div[class=example]
 div[class^=exa]
 div[class$=mple]
 div[class*=e]
-div[class|=dialog]
+div[class|=example]
 div[class!=made_up]
 div[class~=example]
 div:not(.example)
@@ -58,8 +58,9 @@ p:nth-last-of-type(2n)
 p:nth-last-of-type(odd)
 p:nth-last-of-type(2n+1)
 p:nth-last-of-type(n)
-p:only-child
+a:only-child
 p:last-child
 p:first-child
+a:only-of-type
 p:last-of-type
 p:first-of-type
