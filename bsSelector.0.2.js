@@ -162,7 +162,6 @@ var bsSelector = function( doc, trim ){
 			};
 		})(trim)
 	},
-	isQSA = doc['querySelectorAll'] ? 1 : 0,
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
 	className = (function( tagName, clsName ){
@@ -191,9 +190,10 @@ var bsSelector = function( doc, trim ){
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
 	R = {length:0}, arrs = {_l:0},
 	aPsibl = ['previousSibling', 'previousElementSibling'],
-	tEl = DOC.createElement('ul'), isElCld;
+	tEl = DOC.createElement('ul'), isElCld, isQSA;
 	tEl.innerHTML = '<li>1</li>',
-	isElCld = tEl['firstElementChild'] && tEl['lastElementChild'] && tEl['children'] ? 1 : 0;
+	isElCld = tEl['firstElementChild'] && tEl['lastElementChild'] && tEl['children'] ? 1 : 0,
+	isQSA = isElCld && DOC['querySelectorAll'] ? 1 : 0;
 	return function selector( query, doc, r ){
 		var sels, sel,
 			hasParent, hasQSAErr, hasQS,
@@ -249,7 +249,6 @@ var bsSelector = function( doc, trim ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
 			else if( k == '.' ){
-
 				els = className(t0.substr(1)), sels[0].shift();
 				if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
 			}else if( k == '[' || k == ':' ){
