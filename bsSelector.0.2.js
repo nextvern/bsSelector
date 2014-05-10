@@ -66,11 +66,11 @@ var bsSelector = function( doc, trim ){
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = isNchld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
+						if( ( childs = isNelChld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[dir ? j - i - 1 : i];
-								if( (isNchld ? 1:t0.nodeType == 1) && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
+								if( (isNelChld ? 1:t0.nodeType == 1) && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
 									(t2 = domData(t0))[tname] = ( t1 ? tag : '' ) + bsRseq,
 									t2[ename] = t0;break;
 								}
@@ -79,16 +79,16 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[ename] == el;
 				case'only-of-type':case'only-child':
-					if( isNchld && k == 'only-child' ) return el.parentNode.children.length == 1;
+					if( isNelChld && k == 'only-child' ) return el.parentNode.children.length == 1;
 					parent = el.parentNode, dd = domData(parent),
 					t1 = mTag[k], tag = el.tagName;
 					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = isNchld ? parent.children : parent.childNodes ) && ( i = childs.length ) ){
+						if( ( childs = isNelChld ? parent.children : parent.childNodes ) && ( i = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[i];
-								if( (isNchld ? 1:t0.nodeType == 1 ) && (t1 ? tag == t0.tagName : 1) && !m++ )
+								if( (isNelChld ? 1:t0.nodeType == 1 ) && (t1 ? tag == t0.tagName : 1) && !m++ )
 									t2 = t0;
 							}
 							dd[tname] = ( t1 ? tag : '' ) + bsRseq,
@@ -98,7 +98,7 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[lname] == 1 && dd[ename] == el;
 				default:
-					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = isNchld ? parent.children : parent.childNodes ) || !( j = i = childs.length ) )
+					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = isNelChld ? parent.children : parent.childNodes ) || !( j = i = childs.length ) )
 						return;
 					if( v == 'n' ) return 1;
 					t1 = 1, dd = domData(el);
@@ -107,7 +107,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtime || dd.DQtime != bsRseq ){
 							for( i = 0; i < j; i++ ){
 								t0 = childs[i];
-								if( isNchld ? 1:t0.nodeType == 1 ){
+								if( isNelChld ? 1:t0.nodeType == 1 ){
 									(t2 = domData(t0)).DQtime = bsRseq,
 									t2.DQindex = t1++;
 								}
@@ -120,7 +120,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeL || dd.DQtimeL != bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
-								if( isNchld ? 1:t0.nodeType == 1 ){
+								if( isNelChld ? 1:t0.nodeType == 1 ){
 									(t2 = domData(t0)).DQtimeL = bsRseq,
 									t2.DQindexL = t1++;
 								}
@@ -134,7 +134,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeT || dd.DQtimeT != tag + bsRseq ){
 							for( i = 0 ; i < j ; i++ ){
 								t0 = childs[i];
-								if( (isNchld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
+								if( (isNelChld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
 									(t2 = domData(t0)).DQtimeT = tag + bsRseq,
 									t2.DQindexT = t1++;
 								}
@@ -148,7 +148,7 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeTL || dd.DQtimeTL != tag + bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
-								if( (isNchld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
+								if( (isNelChld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
 									(t2 = domData(t0)).DQtimeTL = tag + bsRseq,
 									t2.DQindexTL = t1++;
 								}
@@ -191,10 +191,9 @@ var bsSelector = function( doc, trim ){
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
 	R = {length:0}, arrs = {_l:0},
 	tEl = DOC.createElement('ul'),
-	isNchld, isNelChld;
+	isNelChld;
 	tEl.innerHTML = '<li>1</li>',
-	isNchld = tEl.children ? 1:0,
-	isNelChld = tEl.firstElementChild && tEl.lastElementChild ? 1:0;
+	isNelChld = tEl.children && tEl.firstElementChild && tEl.lastElementChild ? 1:0;
 	return function selector( query, doc, r ){
 		var sels, sel,
 			hasParent, hasQSAErr, hasQS,
