@@ -61,17 +61,17 @@ var bsSelector = function( doc, trim ){
 				case'enabled':return enabled[el.tagName] && el.getAttribute('disabled') === null;
 				case'disabled':return enabled[el.tagName] && el.getAttribute('disabled') !== null;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
-					if( isNelChld && (t1 = nChild[k]) ) return el.parentNode[t1] == el;
+					if( isElCld && ( t1 = nChild[k] ) ) return el.parentNode[t1] == el;
 					dd = domData(el), tag = el.tagName;
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = isNelChld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
+						if( ( childs = isElCld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[dir ? j - i - 1 : i];
-								if( (isNelChld ? 1:t0.nodeType == 1) && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
-									(t2 = domData(t0))[tname] = ( t1 ? tag : '' ) + bsRseq,
+								if( ( isElCld ? 1 : t0.nodeType == 1 ) && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
+									( t2 = domData(t0) )[tname] = ( t1 ? tag : '' ) + bsRseq,
 									t2[ename] = t0;break;
 								}
 							}
@@ -79,16 +79,16 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[ename] == el;
 				case'only-of-type':case'only-child':
-					if( isNelChld && k == 'only-child' ) return el.parentNode.children.length == 1;
+					if( isElCld && k == 'only-child' ) return el.parentNode.children.length == 1;
 					parent = el.parentNode, dd = domData(parent),
 					t1 = mTag[k], tag = el.tagName;
 					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = isNelChld ? parent.children : parent.childNodes ) && ( i = childs.length ) ){
+						if( ( childs = isElCld ? parent.children : parent.childNodes ) && ( i = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[i];
-								if( (isNelChld ? 1:t0.nodeType == 1 ) && (t1 ? tag == t0.tagName : 1) && !m++ )
+								if( ( isElCld ? 1 : t0.nodeType == 1 ) && ( t1 ? tag == t0.tagName : 1 ) && !m++ )
 									t2 = t0;
 							}
 							dd[tname] = ( t1 ? tag : '' ) + bsRseq,
@@ -98,7 +98,7 @@ var bsSelector = function( doc, trim ){
 					}
 					return dd[lname] == 1 && dd[ename] == el;
 				default:
-					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = isNelChld ? parent.children : parent.childNodes ) || !( j = i = childs.length ) )
+					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = isElCld ? parent.children : parent.childNodes ) || !( j = i = childs.length ) )
 						return;
 					if( v == 'n' ) return 1;
 					t1 = 1, dd = domData(el);
@@ -107,8 +107,8 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtime || dd.DQtime != bsRseq ){
 							for( i = 0; i < j; i++ ){
 								t0 = childs[i];
-								if( isNelChld ? 1:t0.nodeType == 1 ){
-									(t2 = domData(t0)).DQtime = bsRseq,
+								if( isElCld ? 1 : t0.nodeType == 1 ){
+									( t2 = domData(t0) ).DQtime = bsRseq,
 									t2.DQindex = t1++;
 								}
 							}
@@ -120,8 +120,8 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeL || dd.DQtimeL != bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
-								if( isNelChld ? 1:t0.nodeType == 1 ){
-									(t2 = domData(t0)).DQtimeL = bsRseq,
+								if( isElCld ? 1 : t0.nodeType == 1 ){
+									( t2 = domData(t0) ).DQtimeL = bsRseq,
 									t2.DQindexL = t1++;
 								}
 							}
@@ -134,8 +134,8 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeT || dd.DQtimeT != tag + bsRseq ){
 							for( i = 0 ; i < j ; i++ ){
 								t0 = childs[i];
-								if( (isNelChld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
-									(t2 = domData(t0)).DQtimeT = tag + bsRseq,
+								if( ( isElCld ? 1 : t0.nodeType == 1 ) && t0.tagName == tag ){
+									( t2 = domData(t0) ).DQtimeT = tag + bsRseq,
 									t2.DQindexT = t1++;
 								}
 							}
@@ -148,8 +148,8 @@ var bsSelector = function( doc, trim ){
 						if( !dd.DQtimeTL || dd.DQtimeTL != tag + bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
-								if( (isNelChld ? 1:t0.nodeType == 1) && t0.tagName == tag ){
-									(t2 = domData(t0)).DQtimeTL = tag + bsRseq,
+								if( ( isElCld ? 1 : t0.nodeType == 1 ) && t0.tagName == tag ){
+									( t2 = domData(t0) ).DQtimeTL = tag + bsRseq,
 									t2.DQindexTL = t1++;
 								}
 							}
@@ -172,7 +172,7 @@ var bsSelector = function( doc, trim ){
 		} : function(cls){
 			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = r[cls] || ( r[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i;
 			r.length = 0;
-			while( i-- ) if( t1.test(t0[i].className) ) r[r.length++] = t0[i];
+			while( i-- ) if( t1.test( t0[i].className ) ) r[r.length++] = t0[i];
 			return r;
 		};
 	})( tagName, clsName ),
@@ -190,10 +190,10 @@ var bsSelector = function( doc, trim ){
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
 	R = {length:0}, arrs = {_l:0},
-	tEl = DOC.createElement('ul'),
-	isNelChld;
+	aPsibl = ['previousSibling', 'previousElementSibling'],
+	tEl = DOC.createElement('ul'), isElCld;
 	tEl.innerHTML = '<li>1</li>',
-	isNelChld = tEl.children && tEl.firstElementChild && tEl.lastElementChild ? 1:0;
+	isElCld = tEl['firstElementChild'] && tEl['lastElementChild'] && tEl['children'] ? 1 : 0;
 	return function selector( query, doc, r ){
 		var sels, sel,
 			hasParent, hasQSAErr, hasQS,
@@ -277,20 +277,21 @@ var bsSelector = function( doc, trim ){
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
 						while( el = el.parentNode )
-							if( hit = ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : (tokens[m] == el.tagName || tokens[m] == '*') ) ) break;
-					}else if( k == '>' ) hit = ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el = el.parentNode, tokens[m] ) :
-						(tokens[m] == (el = el.parentNode).tagName || tokens[m] == '*') );
+							if( hit = ( ( t0 = compare[ tokens[m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ) break;
+					}else if( k == '>' )
+						hit = ( ( t0 = compare[ tokens[++m].charAt(0) ] ) ? t0( el = el.parentNode, tokens[m] ) :
+						( tokens[m] == ( el = el.parentNode).tagName || tokens[m] == '*' ) );
 					else if( k == '+' ){
-						while( el = el.previousSibling ) if( el.nodeType == 1 ) break;
-						hit = el && ( (t0 = compare[ tokens[++m].charAt(0) ]) ? t0( el, tokens[m] ) : (tokens[m] == el.tagName || tokens[m] == '*') );
+						while( el = el[ aPsibl[isElCld] ] ) if( ( isElCld ? 1 : el.nodeType == 1 ) ) break;
+						hit = el && ( ( t0 = compare[ tokens[++m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) );
 					}else if( k == '~' ){
 						m++;
-						while( el = el.previousSibling ){
-							if( el.nodeType == 1 && ( (t0 = compare[ tokens[m].charAt(0) ]) ? t0( el, tokens[m] ) : (tokens[m] == el.tagName || tokens[m] == '*') ) ){
+						while( el = el[ aPsibl[isElCld] ] ){
+							if( ( isElCld ? 1 : el.nodeType == 1 ) && ( ( t0 = compare[ tokens[m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ){
 								hit = 1; break;
 							}
 						}
-					}else hit = ( (t0 = compare[ token.charAt(0) ]) ? t0( el, token ) : (token == el.tagName || token == '*') );
+					}else hit = ( ( t0 = compare[ token.charAt(0) ] ) ? t0( el, token ) : ( token == el.tagName || token == '*' ) );
 					if( !hit ) break;
 				}
 				if( i == j - 1 ) tokens.length = 0, arrs[arrs._l++] = tokens;
