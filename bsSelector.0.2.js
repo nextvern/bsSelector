@@ -43,6 +43,14 @@ var bsSelector = function( doc, trim ){
 			nChild = {'first-child':'firstElementChild', 'last-child':'lastElementChild'},
 			enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
 			checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
+			domData = (function(){
+				var id = 1, data = {};
+				return function domData( el, k, v ){
+					var t0;
+					if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
+					return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
+				};
+			})(),
 			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'not':1, 'selection':1, 
 				'eq':1, 'gt':1, 'lt':1,
 				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
@@ -63,8 +71,8 @@ var bsSelector = function( doc, trim ){
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
 					if( isElCld && ( t1 = nChild[k] ) ) return el.parentNode[t1] == el;
 					dd = domData(el), tag = el.tagName;
-					(t1 = mTag[k]) ? dir ? ( tname = 'DQtimeFCT', ename = 'DQFCTEl' ) : ( tname = 'DQtimeLCT', ename = 'DQLCTEl' ):
-						dir ? ( tname = 'DQtimeFC', ename = 'DQFCEl' ) : ( tname = 'DQtimeLC', ename = 'DQLCEl' );
+					(t1 = mTag[k]) ? dir ? ( tname = 'DQseqFCT', ename = 'DQFCTEl' ) : ( tname = 'DQseqLCT', ename = 'DQLCTEl' ):
+						dir ? ( tname = 'DQseqFC', ename = 'DQFCEl' ) : ( tname = 'DQseqLC', ename = 'DQLCEl' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
 						if( ( childs = isElCld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
 							m = 0;
@@ -82,21 +90,19 @@ var bsSelector = function( doc, trim ){
 					if( isElCld && k == 'only-child' ) return el.parentNode.children.length == 1;
 					parent = el.parentNode, dd = domData(parent),
 					t1 = mTag[k], tag = el.tagName;
-					k == 'only-of-type' ? ( tname = 'DQtimeOT', ename = 'DQTChEl', lname = 'DQTChElLen' ) : ( tname = 'DQtimeOCH', ename = 'DQChEl', lname = 'DQChElLen' );
+					k == 'only-of-type' ? ( tname = 'DQseqOT', lname = 'DQTChElLen' ) : ( tname = 'DQseqOCH', lname = 'DQChElLen' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
 						if( ( childs = isElCld ? parent.children : parent.childNodes ) && ( i = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[i];
-								if( ( isElCld ? 1 : t0.nodeType == 1 ) && ( t1 ? tag == t0.tagName : 1 ) && !m++ )
-									t2 = t0;
+								if( ( isElCld ? 1 : t0.nodeType == 1 ) && ( t1 ? tag == t0.tagName : 1 ) && !m++ );
 							}
 							dd[tname] = ( t1 ? tag : '' ) + bsRseq,
-							dd[ename] = t2,
 							dd[lname] = m;
 						}
 					}
-					return dd[lname] == 1 && dd[ename] == el;
+					return dd[lname] == 1;
 				default:
 					if( !( parent = el.parentNode ) || parent.tagName == 'HTML' || !( childs = isElCld ? parent.children : parent.childNodes ) || !( j = i = childs.length ) )
 						return;
@@ -104,11 +110,11 @@ var bsSelector = function( doc, trim ){
 					t1 = 1, dd = domData(el);
 					switch( k ){
 					case'nth-child':
-						if( !dd.DQtime || dd.DQtime != bsRseq ){
+						if( !dd.DQseq || dd.DQseq != bsRseq ){
 							for( i = 0; i < j; i++ ){
 								t0 = childs[i];
 								if( isElCld ? 1 : t0.nodeType == 1 ){
-									( t2 = domData(t0) ).DQtime = bsRseq,
+									( t2 = domData(t0) ).DQseq = bsRseq,
 									t2.DQindex = t1++;
 								}
 							}
@@ -117,11 +123,11 @@ var bsSelector = function( doc, trim ){
 						v == 'odd' || v == '2n+1' ? t0 % 2 == 1 :
 						t0 == v;
 					case'nth-last-child':
-						if( !dd.DQtimeL || dd.DQtimeL != bsRseq ){
+						if( !dd.DQseqL || dd.DQseqL != bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
 								if( isElCld ? 1 : t0.nodeType == 1 ){
-									( t2 = domData(t0) ).DQtimeL = bsRseq,
+									( t2 = domData(t0) ).DQseqL = bsRseq,
 									t2.DQindexL = t1++;
 								}
 							}
@@ -131,11 +137,11 @@ var bsSelector = function( doc, trim ){
 						t0 == v;
 					case'nth-of-type':
 						tag = el.tagName;
-						if( !dd.DQtimeT || dd.DQtimeT != tag + bsRseq ){
+						if( !dd.DQseqT || dd.DQseqT != tag + bsRseq ){
 							for( i = 0 ; i < j ; i++ ){
 								t0 = childs[i];
 								if( ( isElCld ? 1 : t0.nodeType == 1 ) && t0.tagName == tag ){
-									( t2 = domData(t0) ).DQtimeT = tag + bsRseq,
+									( t2 = domData(t0) ).DQseqT = tag + bsRseq,
 									t2.DQindexT = t1++;
 								}
 							}
@@ -145,11 +151,11 @@ var bsSelector = function( doc, trim ){
 						t0 == v;
 					case'nth-last-of-type':
 						tag = el.tagName;
-						if( !dd.DQtimeTL || dd.DQtimeTL != tag + bsRseq ){
+						if( !dd.DQseqTL || dd.DQseqTL != tag + bsRseq ){
 							while( i-- ){
 								t0 = childs[i];
 								if( ( isElCld ? 1 : t0.nodeType == 1 ) && t0.tagName == tag ){
-									( t2 = domData(t0) ).DQtimeTL = tag + bsRseq,
+									( t2 = domData(t0) ).DQseqTL = tag + bsRseq,
 									t2.DQindexTL = t1++;
 								}
 							}
@@ -175,14 +181,6 @@ var bsSelector = function( doc, trim ){
 			return r;
 		};
 	})( tagName, clsName ),
-	domData = (function(){
-		var id = 1, data = {};
-		return function domData( el, k, v ){
-			var t0;
-			if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
-			return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
-		};
-	})(),
 	bsRseq = 0,
 	mQSA = {' ':1,'+':1,'~':1,':':1,'[':1},
 	mParent = {' ':1, '>':1}, mQSAErr = '!', mBracket = {'[':1, '(':1, ']':2, ')':2},
@@ -279,7 +277,7 @@ var bsSelector = function( doc, trim ){
 							if( hit = ( ( t0 = compare[ tokens[m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ) break;
 					}else if( k == '>' )
 						hit = ( ( t0 = compare[ tokens[++m].charAt(0) ] ) ? t0( el = el.parentNode, tokens[m] ) :
-						( tokens[m] == ( el = el.parentNode).tagName || tokens[m] == '*' ) );
+						( tokens[m] == ( el = el.parentNode ).tagName || tokens[m] == '*' ) );
 					else if( k == '+' ){
 						while( el = el[ aPsibl[isElCld] ] ) if( ( isElCld ? 1 : el.nodeType == 1 ) ) break;
 						hit = el && ( ( t0 = compare[ tokens[++m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) );
