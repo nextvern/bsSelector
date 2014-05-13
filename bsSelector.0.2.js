@@ -51,7 +51,7 @@ var bsSelector = function( doc, trim ){
 					return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
 				};
 			})(),
-			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'not':1, 'selection':1, 
+			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'selection':1,
 				'eq':1, 'gt':1, 'lt':1,
 				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
 			};
@@ -68,6 +68,13 @@ var bsSelector = function( doc, trim ){
 				case'checked':return t0 = checked[el.tagName], ( t0 == 1 && el.checked && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
 				case'enabled':return enabled[el.tagName] && el.getAttribute('disabled') === null;
 				case'disabled':return enabled[el.tagName] && el.getAttribute('disabled') !== null;
+				case'not':
+					switch( v.charAt(0) ){
+					case'#':return v.substr(1) != el.id;
+					case'.':return !( !( t0 = el.className ) ? 0 : ( t1 = v.substr(1), t0.indexOf(' ') < 0 ? t1 == t0 : t0.split(' ').indexOf(t1) > -1 ) );
+					default:return v != el.tagName && v != '*';
+					}
+					return 0;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
 					if( isElCld && ( t1 = nChild[k] ) ) return el.parentNode[t1] == el;
 					dd = domData(el), tag = el.tagName;
