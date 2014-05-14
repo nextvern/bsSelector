@@ -196,6 +196,11 @@ var bsSelector = function( doc, trim ){
 	R = {length:0}, arrs = {_l:0},
 	aPsibl = ['previousSibling', 'previousElementSibling'],
 	tEl = DOC.createElement('ul'), isElCld, isQSA;
+	if( !Array.prototype.indexOf ) Array.prototype.indexOf = function( v, I ){
+		var i, j, k, l;
+		if( j = this.length ) for( I = I || 0, i = I, k = parseInt( ( j - i ) * .5 ) + i + 1, j-- ; i < k ; i++ ) if( this[l = i] === v || this[l = j - i + I] === v ) return l; 
+		return -1;
+	};
 	tEl.innerHTML = '<li>1</li>',
 	isElCld = tEl['firstElementChild'] && tEl['lastElementChild'] && tEl['children'] ? 1 : 0,
 	isQSA = isElCld && DOC['querySelectorAll'] ? 1 : 0;
