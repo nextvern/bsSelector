@@ -66,8 +66,8 @@ var bsSelector = function( doc, trim ){
 				case'lang':return el.getAttribute('lang') == v;
 				case'empty':return el.nodeType == 1 && !el.nodeValue && !el.childNodes.length;
 				case'checked':return t0 = checked[el.tagName], ( t0 == 1 && el.checked && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
-				case'enabled':return enabled[el.tagName] && el.getAttribute('disabled') === null;
-				case'disabled':return enabled[el.tagName] && el.getAttribute('disabled') !== null;
+				case'enabled':return enabled[el.tagName] && ( ( t0 = el.getAttribute('disabled') ) == null || t0 == '' );
+				case'disabled':return enabled[el.tagName] && ( ( t0 = el.getAttribute('disabled') ) != null && t0 != '' );
 				case'not':
 					switch( v.charAt(0) ){
 					case'#':return v.substr(1) != el.id;
@@ -178,11 +178,11 @@ var bsSelector = function( doc, trim ){
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
 	className = (function( tagName, clsName ){
-		var reg = {}, r = {length:0};
+		var reg = {}, r = [];
 		return DOC['getElementsByClassName'] ? function(cls){
 			return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );
 		} : function(cls){
-			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = r[cls] || ( r[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i;
+			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = r[cls] || ( r[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i = t0.length;
 			r.length = 0;
 			while( i-- ) if( t1.test( t0[i].className ) ) r[r.length++] = t0[i];
 			return r;
@@ -193,7 +193,7 @@ var bsSelector = function( doc, trim ){
 	mParent = {' ':1, '>':1}, mQSAErr = '!', mBracket = {'[':1, '(':1, ']':2, ')':2},
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
-	R = {length:0}, arrs = {_l:0},
+	R = [], arrs = {_l:0},
 	aPsibl = ['previousSibling', 'previousElementSibling'],
 	tEl = DOC.createElement('ul'), isElCld, isQSA;
 	if( !Array.prototype.indexOf ) Array.prototype.indexOf = function( v, I ){
@@ -255,6 +255,7 @@ var bsSelector = function( doc, trim ){
 			}
 			sels[i] = t0;
 		}
+		//console.log(sels); return;
 		if( sels.length == 1 ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();

@@ -63,14 +63,14 @@ function( Benchmark, document, selectors ) {
 
 		// Selector engines
 		engines = {
-			// "qsa":            "d.querySelectorAll( s )",
+			//"qsa":            "d.querySelectorAll( s )",
 			"jquery-1.7.2":   "jQuery.find( s, d )",
 			// "jquery-1.8.1":   "jQuery.find( s, d )",
 			// "oldSizzle":      "Sizzle( s, d )",
 			"sizzle":         "Sizzle( s, d )",
 			// "dojo":           "dojo.query( s, d )",
 			"mootools-slick": "Slick.search( d, s )",
-			"bsSelector": "query( s, d )"
+			"bsSelector": "query( s )"
 			// "nwmatcher":      "NW.Dom.select( s, d )"
 		},
 

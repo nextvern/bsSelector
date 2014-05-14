@@ -14,15 +14,15 @@
 </head>
 <body>
 <div id="stage">
-	<div width="50%" class="k0" id="a0">d50<a id="aa0">a0</a></div>
-	<div width="100%" class="k0" id="a1"><a id="aa1">a1</a>d100</div>
+	<div width="50%" class="ka" id="a0">d50<a id="aa0">a0</a></div>
+	<div width="100%" class="ka" id="a1"><a id="aa1">a1</a>d100</div>
 	<input id="i0" type="radio" value="i0" checked>
-	<div class="k0" id="a2" class="example"><p><a id="aaa">aaaa</a></p></div>
-	<div class="k0" id="a3"><span id="sp3">span3</span></div>
+	<div class="ka" id="a2" class="example"><p><a id="aaa">aaaa</a></p></div>
+	<div class="ka" id="a3"><span id="sp3">span3</span></div>
 	<p id="p0" data-test="hika-a">hika-a</p>
 	<p id="p1" data-test="a hika a">a hika a</p>
 	<span id="sp5">span5</span>
-	<div class="k0" id="a4"><span id="sp4">span4</span></div>
+	<div class="ka" id="a4"><span id="sp4">span4</span></div>
 	<p id="p2" data-test="aaahikaaa">aaahikaaa</p>
 	<p id="p3" data-test="hika">hika</p>
 	<p id="p4" data-test="hika"><span>dskdksd</span></p>
@@ -44,6 +44,7 @@
 <div id="result"></div>
 <div id="test"></div>
 <script src="../../../bsJS/bsjs.0.4.js"></script>
+<script src="../../0.2/speed/frameworks/sizzle.js"></script>
 <script src="../../../bsJSTest/bsTest.js"></script>
 <script src="../../../bsJSTest/0.3/printer.js"></script>
 <script src="../../bsSelector.0.2.js"></script>
@@ -59,7 +60,7 @@ var mk = function( sel ){
 		arg = [sel, function(){
 			return count;
 		},
-		document.querySelectorAll(sel).length], i = 0,
+		Sizzle(sel).length], i = 0,
 		mk = function(i){
 			return function(){
 				return query(sel)[i].id;
@@ -72,7 +73,7 @@ tester = ['p:lang(it)','dd:nth-child(even)','dd:nth-of-type(even)','dd:nth-child
 'a:link',':root','dt:only-child','dt:only-of-type','dd:last-of-type','dd:last-child',
 '[target=_blank]','p:empty','input:disabled','input:enabled','input:checked','dd:first-of-type','dd:first-child',
 '[data-test~=hika]','[data-test~=hika]','[data-test~=hika]','[data-test*=hika]','[data-test$=hika]','[data-test^=hika]','[data-test|=hika]',
-'[width]','i,dd','div ~ p ~ p','i b','i > b','p + span','#a0','#a0,#a1','#a0,#a1,#a2','.k0','span',
+'[width]','i,dd','div ~ p ~ p','i b','i > b','p + span','#a0','#a0,#a1','#a0,#a1,#a2','.ka','span',
 'div ~ p','div > p','p > a','div > p > a','i > span > b','i > span','span > b','div.example > p > a','div ~ p ~ p'
 
 
