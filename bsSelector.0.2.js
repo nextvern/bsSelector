@@ -40,6 +40,7 @@ var bsSelector = function( doc, trim ){
 		// pseudo
 		':':(function(trim){
 			var mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
+			nChild = {'first-child':'firstElementChild', 'last-child':'lastElementChild'},
 			enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
 			checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
 			domData = (function(){
@@ -76,6 +77,7 @@ var bsSelector = function( doc, trim ){
 					}
 					return 0;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
+					if( isElCld && ( t1 = nChild[k] ) ) return el.parentNode[t1] == el;
 					dd = domData( parent = el.parentNode ), tag = el.tagName;
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQseqFCT', ename = 'DQFCTEl' ) : ( tname = 'DQseqLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQseqFC', ename = 'DQFCEl' ) : ( tname = 'DQseqLC', ename = 'DQLCEl' );
@@ -85,8 +87,8 @@ var bsSelector = function( doc, trim ){
 							while( i-- ){
 								t0 = childs[dir ? j - i - 1 : i];
 								if( ( isElCld ? 1 : t0.nodeType == 1 ) && ( t1 ? tag == t0.tagName : 1 ) && !m++ ){
-									( t2 = domData(t0) )[tname] = ( t1 ? tag : '' ) + bsRseq,
-									t2[ename] = t0;break;
+									dd[tname] = ( t1 ? tag : '' ) + bsRseq,
+									dd[ename] = t0;break;
 								}
 							}
 						}
@@ -230,7 +232,7 @@ var bsSelector = function( doc, trim ){
 			t0 = arrs._l ? arrs[--arrs._l] : [], t1 = '', sel = sels[i].replace( trim, '' ), m = 0, j = sel.length;
 			while( j-- ){
 				k = sel.charAt(j);
-				if( !hasParent || mParent[k] ) hasParent = 1;
+				if( hasParent || mParent[k] ) hasParent = 1;
 				if( m == 2 && k == '!' ) hasQSAErr = 1;
 				if( ( t2 = mBracket[k] ) && ( m = t2 ) == 2 ) continue;
 				if( !( t2 = mEx[k] ) ) t1 = k + t1;
