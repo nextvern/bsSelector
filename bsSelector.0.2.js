@@ -4,7 +4,7 @@
  * Licensed under the BSD license. See http://opensource.org/licenses/BSD-3-Clause
  * CSS3 & 4 참고자료
  * http://css4-selectors.com/browser-selector-test/
- * http://kimblim.dk/css-tests/selectors/
+ * http://www.w3.org/TR/css3-selectors/
 */
 var bsSelector = function( doc, trim ){
 	'use strict';
@@ -18,7 +18,7 @@ var bsSelector = function( doc, trim ){
 			var t0, k;
 			return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
 		},
-		// pseudo
+		// Attribute
 		'[':(function(){
 			var mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1};
 			return function(el, token){
@@ -37,7 +37,7 @@ var bsSelector = function( doc, trim ){
 				}
 			};
 		})(),
-		// filter
+		// pseudo
 		':':(function(trim){
 			var mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
 			nChild = {'first-child':'firstElementChild', 'last-child':'lastElementChild'},
@@ -68,6 +68,7 @@ var bsSelector = function( doc, trim ){
 				case'checked':return t0 = checked[el.tagName], ( t0 == 1 && el.checked && checked[el.getAttribute('type')] ) || ( t0 == 2 && el.selected );
 				case'enabled':return enabled[el.tagName] && ( ( t0 = el.getAttribute('disabled') ) == null || t0 == '' );
 				case'disabled':return enabled[el.tagName] && ( ( t0 = el.getAttribute('disabled') ) != null && t0 != '' );
+				case'contains':return ( el.innerText || el.textContent || '' ).indexOf(v) > -1;
 				case'not':
 					switch( v.charAt(0) ){
 					case'#':return v.substr(1) != el.id;
@@ -190,7 +191,7 @@ var bsSelector = function( doc, trim ){
 	})( tagName, clsName ),
 	bsRseq = 0,
 	mQSA = {' ':1,'+':1,'~':1,':':1,'[':1},
-	mParent = {' ':1, '>':1}, mQSAErr = '!', mBracket = {'[':1, '(':1, ']':2, ')':2},
+	mParent = {' ':1, '>':1}, mBracket = {'[':1, '(':1, ']':2, ')':2},
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
 	mT0 = {' ':1, '*':2, '>':2, '+':2, '~':2, '#':3, '.':3, ':':3, '[':3}, mT1 = {'>':1, '+':1, '~':1},
 	R = [], arrs = {_l:0},
@@ -198,7 +199,7 @@ var bsSelector = function( doc, trim ){
 	tEl = DOC.createElement('ul'), isElCld, isQSA;
 	if( !Array.prototype.indexOf ) Array.prototype.indexOf = function( v, I ){
 		var i, j, k, l;
-		if( j = this.length ) for( I = I || 0, i = I, k = parseInt( ( j - i ) * .5 ) + i + 1, j-- ; i < k ; i++ ) if( this[l = i] === v || this[l = j - i + I] === v ) return l; 
+		if( j = this.length ) for( I = I || 0, i = I, k = parseInt( ( j - i ) * .5 ) + i + 1, j-- ; i < k ; i++ ) if( this[l = i] === v || this[l = j - i + I] === v ) return l;
 		return -1;
 	};
 	tEl.innerHTML = '<li>1</li>',
@@ -225,7 +226,7 @@ var bsSelector = function( doc, trim ){
 			while( j-- ){
 				k = sel.charAt(j);
 				if( hasParent || mParent[k] ) hasParent = 1;
-				if( hasQSAErr || m == 2 && k == '!' ) hasQSAErr = 1;
+				if( m == 2 && k == '!' ) hasQSAErr = 1;
 				if( ( t2 = mBracket[k] ) && ( m = t2 ) == 2 ) continue;
 				if( !( t2 = mEx[k] ) ) t1 = k + t1;
 				if( t2 && m == 2 ) t1 = k + t1;
@@ -245,17 +246,20 @@ var bsSelector = function( doc, trim ){
 			while( j-- ){
 				if( rTag.test(t0[j]) ) t0[j] = t0[j].toUpperCase();
 				else if( t0[j].charAt(0) == ':' ){
-					t0[j] = t0[j].toLowerCase();
-					if( ( t0[j] == ':nth-child(n' || t0[j] == ':nth-last-child(n' ) && t0.length != 1 ){
-						t0.splice( j, 1 );
-						continue;
+					if( !( t1 = t0[j] ).toLowerCase().indexOf( ':contains(' ) ){
+						hasQSAErr = 1; continue;
+					}else{
+						t0[j] = t1;
+						if( ( t1 == ':nth-child(n' || t1 == ':nth-last-child(n' ) && t0.length != 1 ){
+							hasQSAErr = 1, t0.splice( j, 1 ); continue;
+						}
 					}
 				}
-				if( isQSA && !hasQSAErr && !hasQS && !mQSA[t0[j].charAt(0)] ) hasQS = 1;
+				if( isQSA && !hasQS && !mQSA[t0[j].charAt(0)] ) hasQS = 1;
 			}
 			sels[i] = t0;
 		}
-		//console.log(sels); return;
+		if( hasQSAErr ) hasQS = 0;
 		if( sels.length == 1 ){
 			t0 = sels[0][0];
 			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
