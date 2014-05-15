@@ -40,7 +40,6 @@ var bsSelector = function( doc, trim ){
 		// pseudo
 		':':(function(trim){
 			var mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
-			nChild = {'first-child':'firstElementChild', 'last-child':'lastElementChild'},
 			enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
 			checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
 			domData = (function(){
@@ -77,12 +76,11 @@ var bsSelector = function( doc, trim ){
 					}
 					return 0;
 				case'first-child':case'first-of-type':dir = 1;case'last-child':case'last-of-type':
-					if( isElCld && ( t1 = nChild[k] ) ) return el.parentNode[t1] == el;
-					dd = domData(el), tag = el.tagName;
+					dd = domData( parent = el.parentNode ), tag = el.tagName;
 					(t1 = mTag[k]) ? dir ? ( tname = 'DQseqFCT', ename = 'DQFCTEl' ) : ( tname = 'DQseqLCT', ename = 'DQLCTEl' ):
 						dir ? ( tname = 'DQseqFC', ename = 'DQFCEl' ) : ( tname = 'DQseqLC', ename = 'DQLCEl' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
-						if( ( childs = isElCld ? el.parentNode.children : el.parentNode.childNodes ) && ( i = j = childs.length ) ){
+						if( ( childs = isElCld ? parent.children : parent.childNodes ) && ( i = j = childs.length ) ){
 							m = 0;
 							while( i-- ){
 								t0 = childs[dir ? j - i - 1 : i];
@@ -96,7 +94,7 @@ var bsSelector = function( doc, trim ){
 					return dd[ename] == el;
 				case'only-of-type':case'only-child':
 					if( isElCld && k == 'only-child' ) return el.parentNode.children.length == 1;
-					parent = el.parentNode, dd = domData(parent),
+					dd = domData( parent = el.parentNode ),
 					t1 = mTag[k], tag = el.tagName;
 					k == 'only-of-type' ? ( tname = 'DQseqOT', lname = 'DQTChElLen' ) : ( tname = 'DQseqOCH', lname = 'DQChElLen' );
 					if( !dd[tname] || dd[tname] != ( t1 ? tag : '' ) + bsRseq ){
@@ -190,6 +188,8 @@ var bsSelector = function( doc, trim ){
 		};
 	})( tagName, clsName ),
 	bsRseq = 0,
+	navi,
+	chrome = ( navi = window['navigator'].userAgent.toLowerCase() ).indexOf('chrome') > -1 || navi.indexOf('crios') ? 1 : 0,
 	mQSA = {' ':1,'+':1,'~':1,':':1,'[':1},
 	mParent = {' ':1, '>':1}, mBracket = {'[':1, '(':1, ']':2, ')':2},
 	mEx = {' ':1, '*':1, ']':1, '>':1, '+':1, '~':1, '^':1, '$':1},
@@ -218,6 +218,11 @@ var bsSelector = function( doc, trim ){
 			case'.':return className(query.substr(1));
 			default:return tagName[query] || ( tagName[query] = doc.getElementsByTagName(query) );
 		}
+		if( chrome && isQSA ){
+			if( ( t0 = query.toLowerCase() ).indexOf(':contains') < 0 && t0.indexOf('!') < 0 ){
+				return doc.querySelectorAll(query);
+			}
+		}
 		if( isQSA && ( i = query.indexOf(',') ) > -1 && query.indexOf('!') < 0 ) return doc.querySelectorAll(query);
 		if( i == -1 ) sels = arrs._l ? arrs[--arrs._l] : [], sels[0] = query, i = 1;
 		else sels = query.split(','), i = sels.length;
@@ -225,7 +230,7 @@ var bsSelector = function( doc, trim ){
 			t0 = arrs._l ? arrs[--arrs._l] : [], t1 = '', sel = sels[i].replace( trim, '' ), m = 0, j = sel.length;
 			while( j-- ){
 				k = sel.charAt(j);
-				if( hasParent || mParent[k] ) hasParent = 1;
+				if( !hasParent || mParent[k] ) hasParent = 1;
 				if( m == 2 && k == '!' ) hasQSAErr = 1;
 				if( ( t2 = mBracket[k] ) && ( m = t2 ) == 2 ) continue;
 				if( !( t2 = mEx[k] ) ) t1 = k + t1;
