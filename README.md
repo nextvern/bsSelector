@@ -1,7 +1,7 @@
 bsSelector
 ==========
 ##Beyond the Sizzle.js. 
-##Fastest JavaScript DOM Selector.
+##Fastest pure-JavaScript CSS DOM Selector engine.
 
 bsJS 의 Selector 연구나무 
 This project is sub-project of projectBS. 
