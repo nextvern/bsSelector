@@ -6,24 +6,24 @@
  * http://css4-selectors.com/browser-selector-test/
  * http://www.w3.org/TR/css3-selectors/
 */
-var bsSelector = function( doc, trim ){
+var bsSelector = function( doc, trim, domData ){
 	'use strict';
 	var compare = {
 		// id
-		'#':function(el, token){
+		'#':function( el, token ){
 			return token.substr(1) == el.id;
 		},
 		// class
-		'.':function(el, token){
+		'.':function( el, token ){
 			var t0, k;
 			return !( t0 = el.className ) ? 0 : ( k = token.substr(1), t0.indexOf(' ') > -1 ? k == t0 : t0.split(' ').indexOf(k) > -1 );
 		},
 		// Attribute
 		'[':(function(){
 			var mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1};
-			return function(el, token){
+			return function( el, token ){
 				var t0, t1, i, v;
-				if( ( i = token.indexOf('=') ) == -1 ) return el.getAttribute(token.substr(1)) === null ? 0 : 1;
+				if( ( i = token.indexOf('=') ) == -1 ) return el.getAttribute( token.substr(1) ) === null ? 0 : 1;
 				if( ( t0 = el.getAttribute( token.substring( 1, i - ( mT0[t1 = token.charAt( i - 1 )] ? 1 : 0 ) ) ) ) === null ) return;
 				v = token.substr( i + 1 );
 				switch( t1 ){
@@ -38,24 +38,16 @@ var bsSelector = function( doc, trim ){
 			};
 		})(),
 		// pseudo
-		':':(function(trim){
+		':':(function( trim, domData ){
 			var mTag = {'first-of-type':1, 'last-of-type':1, 'only-of-type':1},
 			nChild = {'first-child':'firstElementChild', 'last-child':'lastElementChild'},
 			enabled = {INPUT:1, BUTTON:1, SELECT:1, OPTION:1, TEXTAREA:1},
 			checked = {INPUT:1, radio:1, checkbox:1, OPTION:2},
-			domData = (function(){
-				var id = 1, data = {};
-				return function domData( el, k, v ){
-					var t0;
-					if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
-					return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
-				};
-			})(),
 			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'selection':1,
 				'eq':1, 'gt':1, 'lt':1,
 				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
 			};
-			return function filters(el, token){
+			return function filters( el, token ){
 				var parent, childs, tag, dir, t0, t1, t2, k, v, i, j, m, dd, tname, ename, lname;
 				k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
 				if( v ) k = k.substring( 0, i );
@@ -146,7 +138,7 @@ var bsSelector = function( doc, trim ){
 					case'nth-of-type':
 						tag = el.tagName;
 						if( !dd.DQseqT || dd.DQseqT != tag + bsRseq ){
-							for( i = 0 ; i < j ; i++ ){
+							for( i = 0; i < j; i++ ){
 								t0 = childs[i];
 								if( ( isElCld ? 1 : t0.nodeType == 1 ) && t0.tagName == tag ){
 									( t2 = domData(t0) ).DQseqT = tag + bsRseq,
@@ -174,7 +166,14 @@ var bsSelector = function( doc, trim ){
 					}
 				}//
 			};
-		})(trim)
+		})( trim, domData || (function(){
+				var id = 1, data = {};
+				return function domData( el, k, v ){
+					var t0;
+					if( !( t0 = el['data-bs'] ) ) el['data-bs'] = t0 = id++, data[t0] = {};
+					return k == undefined ? data[t0] : v == undefined ? data[t0][k] : v === null ? delete data[t0][k] : ( data[t0][k] = v );
+				};
+			})() )
 	},
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
@@ -201,7 +200,7 @@ var bsSelector = function( doc, trim ){
 	tEl = DOC.createElement('ul'), isElCld, isQSA;
 	if( !Array.prototype.indexOf ) Array.prototype.indexOf = function( v, I ){
 		var i, j, k, l;
-		if( j = this.length ) for( I = I || 0, i = I, k = parseInt( ( j - i ) * .5 ) + i + 1, j-- ; i < k ; i++ ) if( this[l = i] === v || this[l = j - i + I] === v ) return l;
+		if( j = this.length ) for( I = I || 0, i = I, k = parseInt( ( j - i ) * .5 ) + i + 1, j--; i < k; i++ ) if( this[l = i] === v || this[l = j - i + I] === v ) return l;
 		return -1;
 	};
 	tEl.innerHTML = '<li>1</li>',
@@ -298,21 +297,21 @@ var bsSelector = function( doc, trim ){
 					if( ( k = token.charAt(0) ) == ' ' ){
 						m++;
 						while( el = el.parentNode )
-							if( hit = ( ( t0 = compare[ tokens[m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ) break;
+							if( hit = ( ( t0 = compare[tokens[m].charAt(0)] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ) break;
 					}else if( k == '>' )
-						hit = ( ( t0 = compare[ tokens[++m].charAt(0) ] ) ? t0( el = el.parentNode, tokens[m] ) :
+						hit = ( ( t0 = compare[tokens[++m].charAt(0)] ) ? t0( el = el.parentNode, tokens[m] ) :
 						( tokens[m] == ( el = el.parentNode ).tagName || tokens[m] == '*' ) );
 					else if( k == '+' ){
-						while( el = el[ aPsibl[isElCld] ] ) if( ( isElCld ? 1 : el.nodeType == 1 ) ) break;
-						hit = el && ( ( t0 = compare[ tokens[++m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) );
+						while( el = el[aPsibl[isElCld]] ) if( ( isElCld ? 1 : el.nodeType == 1 ) ) break;
+						hit = el && ( ( t0 = compare[tokens[++m].charAt(0)] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) );
 					}else if( k == '~' ){
 						m++;
-						while( el = el[ aPsibl[isElCld] ] ){
-							if( ( isElCld ? 1 : el.nodeType == 1 ) && ( ( t0 = compare[ tokens[m].charAt(0) ] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ){
+						while( el = el[aPsibl[isElCld]] ){
+							if( ( isElCld ? 1 : el.nodeType == 1 ) && ( ( t0 = compare[tokens[m].charAt(0)] ) ? t0( el, tokens[m] ) : ( tokens[m] == el.tagName || tokens[m] == '*' ) ) ){
 								hit = 1; break;
 							}
 						}
-					}else hit = ( ( t0 = compare[ token.charAt(0) ] ) ? t0( el, token ) : ( token == el.tagName || token == '*' ) );
+					}else hit = ( ( t0 = compare[token.charAt(0)] ) ? t0( el, token ) : ( token == el.tagName || token == '*' ) );
 					if( !hit ) break;
 				}
 				if( i == j - 1 ) tokens.length = 0, arrs[arrs._l++] = tokens;
