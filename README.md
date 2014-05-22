@@ -1,3 +1,5 @@
+![bsSelector](./logo.jpg "bsSelector")
+
 bsSelector
 ==========
 ##Beyond the Sizzle.js. 
