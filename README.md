@@ -1,4 +1,4 @@
-![bsSelector](http://projectbs.github.io/bsSelector/logo.jpg "bsSelector")
+![bsSelector](http://projectbs.github.io/bsSelector/logo.png "bsSelector")
 
 bsSelector
 ==========
