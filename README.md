@@ -1,7 +1,6 @@
-![bsSelector](http://projectbs.github.io/bsSelector/logo.png "bsSelector")
-
 bsSelector
 ==========
+![bsSelector](http://projectbs.github.io/bsSelector/logo.png "bsSelector")
 ##Beyond the Sizzle.js. 
 ##Fastest pure-JavaScript CSS DOM Selector engine.
 
