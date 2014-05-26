@@ -9,5 +9,5 @@ This project is sub-project of projectBS.
 https://github.com/projectBS
 
 ## benchmark
-http://projectbs.github.io/bsSelector/0.2/speed/?qsa (with querySelectorAll)
+http://projectbs.github.io/bsSelector/0.2/speed/?qsa (with querySelectorAll) 
 http://projectbs.github.io/bsSelector/0.2/speed/ (without querySelectorAll)
