@@ -182,9 +182,9 @@ var bsSelector = function( doc, trim, domData ){
 		return DOC['getElementsByClassName'] ? function(cls){
 			return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );
 		} : function(cls){
-			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = r[cls] || ( r[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i = t0.length;
+			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = reg[cls] || ( reg[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i = t0.length;
 			r.length = 0;
-			while( i-- ) if( t1.test( t0[i].className ) ) r[r.length++] = t0[i];
+			while( i-- ) if( t1.test( t0[i].className ) ) r[r.length+1] = t0[i];
 			return r;
 		};
 	})( tagName, clsName ),
