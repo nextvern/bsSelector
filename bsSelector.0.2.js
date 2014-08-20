@@ -178,13 +178,12 @@ var bsSelector = function( doc, trim, domData ){
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
 	className = (function( tagName, clsName ){
-		var reg = {}, r = [];
-		return DOC['getElementsByClassName'] ? function(cls){
-			return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );
-		} : function(cls){
-			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1 = reg[cls] || ( reg[cls] = new RegExp( '\\b' + cls + '\\b', 'g' ) ), i = t0.length;
+		var r = [];
+		return DOC['getElementsByClassName'] ? function(cls){return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );} : 
+		function(cls){
+			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1, i = t0.length;
 			r.length = 0;
-			while( i-- ) if( t1.test( t0[i].className ) ) r[r.length] = t0[i];
+			while( i-- ) if( cls == ( t1 = t0[i].className ) || t1.indexOf( cls + ' ' ) > -1 || t1.indexOf( ' ' + cls ) > -1 ) r[r.length] = t0[i];
 			return r;
 		};
 	})( tagName, clsName ),
