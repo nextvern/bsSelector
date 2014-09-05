@@ -1,5 +1,5 @@
-/* bsSelector v0.3
- * Copyright (c) 2014 by ProjectBS Committe and contributors. 
+/* bsSelector v0.3.1
+ * Copyright (c) 2014 by ProjectBS Committe and contributors.
  * http://www.bsplugin.com All rights reserved.
  * Licensed under the BSD license. See http://opensource.org/licenses/BSD-3-Clause
 */
@@ -7,24 +7,25 @@ var bsSelector = function( doc, trim, domData ){
 	'use strict';
 	var subTokens = {},
 	subTokener = function( sels ){
-		var i, j, k, m = sels.length, n, sel, token, t0, t1, v,
-			skip ={'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'selection':1,
-				'eq':1, 'gt':1, 'lt':1,
-				'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
-			},
-			mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1};
-		while(m--){//,
+		var i, j, k, m, n, sel, token, t0, t1, v, skip, mT0;
+		m = sels.length,
+		mT0 = {'~':1, '|':1, '!':1, '^':1, '$':1, '*':1},
+		skip = {'target':1, 'active':1, 'visited':1, 'first-line':1, 'first-letter':1, 'hover':1, 'focus':1, 'after':1, 'before':1, 'selection':1,
+			'eq':1, 'gt':1, 'lt':1,
+			'valid':1, 'invalid':1, 'optional':1, 'in-range':1, 'out-of-range':1, 'read-only':1, 'read-write':1, 'required':1
+		};
+		while( m-- ){//,
 			sel = sels[m], j = sel.length;
-			while(j--){
+			while( j-- ){
 				token = sel[j], k = token.charAt(0);
-				if(k == '['){
+				if( k == '[' ){
 					subTokens[token] = [];
 					if( ( i = token.indexOf('=') ) == -1 ) subTokens[token].push( token.substr(1) );
 					else
 						subTokens[token].push( token.substring( 1, i - ( mT0[t1 = token.charAt( i - 1 )] ? 1 : 0 ) ) ),
 						subTokens[token].push( t1 ),
 						subTokens[token].push( token.substr( i + 1 ) );
-				}else if(k == ':'){
+				}else if( k == ':' ){
 					subTokens[token] = [],
 					k = token.substr(1), i = k.indexOf('('), v = i > -1 ? isNaN( t0 = k.substr( i + 1 ) ) ? t0.replace( trim, '' ) : parseFloat(t0) : null;
 					if( v ) k = k.substring( 0, i );
@@ -195,6 +196,16 @@ var bsSelector = function( doc, trim, domData ){
 	},
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
+	getById = (function(tagName){
+		return DOC['getElementById'] ? function(id){return DOC.getElementById(id);} : 
+		function(id){
+			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1, i = 0, j = t0.length;
+			while( i < j ){
+				if( id == t0[i].id ) return t0[i];
+				i++;
+			}
+		};
+	})(tagName),
 	className = (function( tagName, clsName ){
 		var r = [];
 		return DOC['getElementsByClassName'] ? function(cls){return clsName[cls] || ( clsName[cls] = DOC.getElementsByClassName(cls) );} : 
@@ -232,7 +243,7 @@ var bsSelector = function( doc, trim, domData ){
 		if( !r ) r = R;
 		r.length = 0, doc ? ( DOC = doc ) : ( doc = DOC );
 		if( rClsTagId.test(query) ) switch( query.charAt(0) ){
-			case'#':return r[r.length] = doc.getElementById(query.substr(1)), r;
+			case'#':return r[r.length] = getById(query.substr(1)), r;
 			case'.':return className(query.substr(1));
 			default:return tagName[query] || ( tagName[query] = doc.getElementsByTagName(query) );
 		}
@@ -285,7 +296,7 @@ var bsSelector = function( doc, trim, domData ){
 		if( hasQSAErr ) hasQS = 0;
 		if( sels.length == 1 ){
 			t0 = sels[0][0];
-			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById(t0.substr(1)), sels[0].shift();
+			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = getById(t0.substr(1)), sels[0].shift();
 			else if( k == '.' ){
 				els = className(t0.substr(1)), sels[0].shift();
 				if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
@@ -293,7 +304,7 @@ var bsSelector = function( doc, trim, domData ){
 				if( hasQS ) return doc.querySelectorAll(query);
 				if( !hasParent ){
 					t0 = sels[0][sels[0].length - 1], k = t0.charAt(0);
-					if( k == '#' ) sels[0].pop(), els = arrs._l ? arrs[--arrs._l] : [], els[0] = doc.getElementById( t0.substr(1) );
+					if( k == '#' ) sels[0].pop(), els = arrs._l ? arrs[--arrs._l] : [], els[0] = getById( t0.substr(1) );
 					else if( k == '.' ) sels[0].pop(), els = className( t0.substr(1) );
 					else if( rTag.test(t0) ) sels[0].pop(), els = tagName[t0] || ( tagName[t0] = doc.getElementsByTagName(t0) );
 				}
