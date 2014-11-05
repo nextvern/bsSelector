@@ -197,13 +197,20 @@ var bsSelector = function( doc, trim, domData ){
 	rTag = /^[a-z]+[0-9]*$/i, rAlpha = /[a-z]/i, rClsTagId = /^[.#]?[a-z0-9]+$/i,
 	DOC = document, tagName = {}, clsName = {},
 	getById = (function(tagName){
-		return DOC['getElementById'] ? function(id){return DOC.getElementById(id);} : 
-		function(id){
+		var r = [];
+		return DOC['getElementById'] ? function(id){
+			var t0;
+			return r.length = 0, (t0 = DOC.getElementById(id)) ? (r[0] = t0, r) : r;
+		} : function(id){
 			var t0 = tagName['*'] || ( tagName['*'] = DOC.getElementsByTagName('*') ), t1, i = 0, j = t0.length;
+			r.length = 0;
 			while( i < j ){
-				if( id == t0[i].id ) return t0[i];
+				if( id == t0[i].id ){
+					r[0] = t0[i]; break;
+				}
 				i++;
 			}
+			return r;
 		};
 	})(tagName),
 	className = (function( tagName, clsName ){
@@ -241,9 +248,9 @@ var bsSelector = function( doc, trim, domData ){
 			el, els, hit, token, tokens;
 
 		if( !r ) r = R;
-		r.length = 0, doc ? ( DOC = doc ) : ( doc = DOC );
+		doc ? ( DOC = doc ) : ( doc = DOC );
 		if( rClsTagId.test(query) ) switch( query.charAt(0) ){
-			case'#':return r[r.length] = getById(query.substr(1)), r;
+			case'#':return getById(query.substr(1));
 			case'.':return className(query.substr(1));
 			default:return tagName[query] || ( tagName[query] = doc.getElementsByTagName(query) );
 		}
@@ -296,7 +303,7 @@ var bsSelector = function( doc, trim, domData ){
 		if( hasQSAErr ) hasQS = 0;
 		if( sels.length == 1 ){
 			t0 = sels[0][0];
-			if( ( k = t0.charAt(0) ) == '#' ) els = arrs._l ? arrs[--arrs._l] : [], els[0] = getById(t0.substr(1)), sels[0].shift();
+			if( ( k = t0.charAt(0) ) == '#' ) els = getById(t0.substr(1)), sels[0].shift();
 			else if( k == '.' ){
 				els = className(t0.substr(1)), sels[0].shift();
 				if( hasQS && els.length > 100 ) return doc.querySelectorAll(query);
@@ -304,7 +311,7 @@ var bsSelector = function( doc, trim, domData ){
 				if( hasQS ) return doc.querySelectorAll(query);
 				if( !hasParent ){
 					t0 = sels[0][sels[0].length - 1], k = t0.charAt(0);
-					if( k == '#' ) sels[0].pop(), els = arrs._l ? arrs[--arrs._l] : [], els[0] = getById( t0.substr(1) );
+					if( k == '#' ) sels[0].pop(), els = getById( t0.substr(1) );
 					else if( k == '.' ) sels[0].pop(), els = className( t0.substr(1) );
 					else if( rTag.test(t0) ) sels[0].pop(), els = tagName[t0] || ( tagName[t0] = doc.getElementsByTagName(t0) );
 				}
@@ -317,7 +324,7 @@ var bsSelector = function( doc, trim, domData ){
 		if( !sels[0].length ) return arrs[arrs._l++] = sels[0], sels.length = 0, arrs[arrs._l++] = sels, els;
 		subTokener(sels);
 		//return;
-		bsRseq++;
+		bsRseq++, r.length = 0;
 		for( i = 0, j = els.length; i < j; i++ ){
 			l = sels.length;
 			while( l-- ){
